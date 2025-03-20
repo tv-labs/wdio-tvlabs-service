@@ -1,0 +1,19 @@
+# Source files
+src/**/*
+tests/**/*
+node_modules
+
+# GitHub workflows
+.github/**/*
+
+# Development configuration files
+.gitignore
+.prettierignore
+.prettierrc
+eslint.config.js
+tsconfig.json
+package-lock.json
+.npmignore
+
+# Misc
+.DS_Store
