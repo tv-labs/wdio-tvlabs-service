@@ -15,6 +15,10 @@ jobs:
           node-version-file: './package.json'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Get Package Version
+        id: package-version
+        run: echo "version=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+
       - name: Install dependencies
         run: npm ci
 
@@ -36,7 +40,8 @@ jobs:
         with:
           payload: |
             {
-              "GIT_COMMIT_MESSAGE": ${{ env.COMMIT_MESSAGES_JSON }}
+              "GIT_COMMIT_MESSAGE": ${{ env.COMMIT_MESSAGES_JSON }},
+              "VERSION": ${{ steps.package-version.outputs.version }}
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.PUBLISH_SLACK_WEBHOOK_URL }}
