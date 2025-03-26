@@ -1,4 +1,4 @@
-name: Deploy WebdriverIO TV Labs Service
+name: Publish WebdriverIO TV Labs Service
 
 on:
   workflow_dispatch:
@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: './package.json'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: npm ci
