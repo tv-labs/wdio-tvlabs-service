@@ -1,4 +1,4 @@
-name: Deploy WebdriverIO TV Labs Service
+name: Publish WebdriverIO TV Labs Service
 
 on:
   workflow_dispatch:
@@ -13,6 +13,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: './package.json'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Get Package Version
+        id: package-version
+        run: echo "version=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: npm ci
@@ -20,5 +25,24 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Check auth token
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm whoami
+
       - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --dry-run
+
+      - name: Publish notification
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "VERSION": "${{ steps.package-version.outputs.version }}",
+              "PACKAGE_LINK": "https://www.npmjs.com/package/wdio-tvlabs-service/v/${{ steps.package-version.outputs.version }}",
+              "PACKAGE_NAME": "wdio-tvlabs-service"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.PUBLISH_SLACK_WEBHOOK_URL }}

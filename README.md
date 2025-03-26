@@ -4,7 +4,7 @@
 
 The service first makes a session request, and then subscribes to events for that request. Once the session has been filled and is ready for the Webdriver script to begin, the service receives a ready event with the TV Labs session ID. This session ID is injected into the capabilities as `tvlabs:session_id` on the `POST /session` Webdriver session create request.
 
-## Installation, TODO: publish me
+## Installation
 
 In your WebdriverIO project, run one of the following commands to install:
 
