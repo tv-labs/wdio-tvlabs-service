@@ -24,6 +24,8 @@ export type TVLabsCapabilities =
     'tvlabs:device_timeout'?: number;
   };
 
+export type TVLabsSessionRequestEventHandler = (response: TVLabsSessionRequestUpdate) => void;
+
 export type TVLabsSessionRequestUpdate = {
   request_id: string;
   session_id: string;

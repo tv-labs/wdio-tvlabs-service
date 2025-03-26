@@ -6,8 +6,8 @@ import { SevereServiceError } from 'webdriverio';
 import type {
   TVLabsCapabilities,
   TVLabsSessionChannelParams,
+  TVLabsSessionRequestEventHandler,
   TVLabsSessionRequestResponse,
-  TVLabsSessionRequestUpdate,
 } from './types.js';
 import type { PhoenixChannelJoinResponse } from './phoenix.js';
 
@@ -17,6 +17,15 @@ export class TVLabsChannel {
   private socket: Socket;
   private lobbyTopic: Channel;
   private requestTopic?: Channel;
+
+  private readonly events = {
+    SESSION_READY: 'session:ready',
+    SESSION_FAILED: 'session:failed',
+    REQUEST_CANCELED: 'request:canceled',
+    REQUEST_FAILED: 'request:failed',
+    REQUEST_FILLED: 'request:filled',
+    REQUEST_MATCHING: 'request:matching',
+  } as const;
 
   constructor(
     private endpoint: string = 'ws://localhost:4000/appium',
@@ -74,71 +83,54 @@ export class TVLabsChannel {
   }
 
   private async observeRequest(requestId: string): Promise<string> {
+    const cleanup = () => this.unobserveRequest();
+
     return new Promise<string>((res, rej) => {
       this.requestTopic = this.socket.channel(`requests:${requestId}`);
 
-      this.requestTopic.on(
-        'session:ready',
-        ({ session_id }: TVLabsSessionRequestUpdate) => {
+      const eventHandlers: Record<string, TVLabsSessionRequestEventHandler> = {
+        [this.events.SESSION_READY]: ({ session_id }) => {
           log.info(`Session ${session_id} ready!`);
           res(session_id);
         },
-      );
-
-      this.requestTopic.on(
-        'session:failed',
-        ({ session_id, reason }: TVLabsSessionRequestUpdate) => {
+        [this.events.SESSION_FAILED]: ({ session_id, reason }) => {
           log.error(`Session ${session_id} failed, reason: ${reason}`);
           rej(reason);
         },
-      );
-
-      this.requestTopic.on(
-        'request:canceled',
-        ({ request_id, reason }: TVLabsSessionRequestUpdate) => {
+        [this.events.REQUEST_CANCELED]: ({ request_id, reason }) => {
           log.info(`Session request ${request_id} canceled, reason: ${reason}`);
           rej(reason);
         },
-      );
-
-      this.requestTopic.on(
-        'request:failed',
-        ({ request_id, reason }: TVLabsSessionRequestUpdate) => {
+        [this.events.REQUEST_FAILED]: ({ request_id, reason }) => {
           log.info(`Session request ${request_id} failed, reason: ${reason}`);
           rej(reason);
         },
-      );
-
-      this.requestTopic.on(
-        'request:filled',
-        ({ session_id, request_id }: TVLabsSessionRequestUpdate) => {
+        [this.events.REQUEST_FILLED]: ({ session_id, request_id }) => {
           log.info(
             `Session request ${request_id} filled, session ID: ${session_id}. Waiting for device to be ready...`,
           );
         },
-      );
-
-      this.requestTopic.on(
-        'request:matching',
-        ({ request_id }: TVLabsSessionRequestUpdate) => {
+        [this.events.REQUEST_MATCHING]: ({ request_id }) => {
           log.info(`Session request ${request_id} matching...`);
         },
-      );
+      };
+
+      Object.entries(eventHandlers).forEach(([event, handler]) => {
+        this.requestTopic?.on(event, handler);
+      })
 
       this.join(this.requestTopic).catch((err) => {
         log.error('Error joining request topic:', err);
         rej(err);
       });
-    }).finally(() => this.unobserveRequest());
+    }).finally(cleanup);
   }
 
   private unobserveRequest() {
-    this.requestTopic?.off('session:ready');
-    this.requestTopic?.off('session:failed');
-    this.requestTopic?.off('request:canceled');
-    this.requestTopic?.off('request:filled');
-    this.requestTopic?.off('request:matching');
-    this.requestTopic?.off('request:failed');
+    Object.values(this.events).forEach((event) => {
+      this.requestTopic?.off(event);
+    })
+
     this.requestTopic?.leave();
 
     this.requestTopic = undefined;
