@@ -89,10 +89,23 @@ export class TVLabsChannel {
       this.requestTopic = this.socket.channel(`requests:${requestId}`);
 
       const eventHandlers: Record<string, TVLabsSessionRequestEventHandler> = {
+        // Ready event
         [this.events.SESSION_READY]: ({ session_id }) => {
           log.info(`Session ${session_id} ready!`);
           res(session_id);
         },
+
+        // Information events
+        [this.events.REQUEST_FILLED]: ({ session_id, request_id }) => {
+          log.info(
+            `Session request ${request_id} filled, session ID: ${session_id}. Waiting for device to be ready...`,
+          );
+        },
+        [this.events.REQUEST_MATCHING]: ({ request_id }) => {
+          log.info(`Session request ${request_id} matching...`);
+        },
+
+        // Failure events
         [this.events.SESSION_FAILED]: ({ session_id, reason }) => {
           log.error(`Session ${session_id} failed, reason: ${reason}`);
           rej(reason);
@@ -104,14 +117,6 @@ export class TVLabsChannel {
         [this.events.REQUEST_FAILED]: ({ request_id, reason }) => {
           log.info(`Session request ${request_id} failed, reason: ${reason}`);
           rej(reason);
-        },
-        [this.events.REQUEST_FILLED]: ({ session_id, request_id }) => {
-          log.info(
-            `Session request ${request_id} filled, session ID: ${session_id}. Waiting for device to be ready...`,
-          );
-        },
-        [this.events.REQUEST_MATCHING]: ({ request_id }) => {
-          log.info(`Session request ${request_id} matching...`);
         },
       };
 
