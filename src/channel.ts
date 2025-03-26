@@ -11,7 +11,7 @@ import type {
 } from './types.js';
 import type { PhoenixChannelJoinResponse } from './phoenix.js';
 
-const log = logger('TVLabsChannel');
+const log = logger('wdio-tvlabs-service');
 
 export class TVLabsChannel {
   private socket: Socket;
@@ -44,9 +44,13 @@ export class TVLabsChannel {
   }
 
   async connect(): Promise<void> {
+    log.debug('Connecting to TV Labs...');
+
     this.socket.connect();
 
     await this.join(this.lobbyTopic);
+
+    log.debug('Connected to TV Labs!');
   }
 
   async newSession(
@@ -122,7 +126,7 @@ export class TVLabsChannel {
 
       Object.entries(eventHandlers).forEach(([event, handler]) => {
         this.requestTopic?.on(event, handler);
-      })
+      });
 
       this.join(this.requestTopic).catch((err) => {
         log.error('Error joining request topic:', err);
@@ -134,7 +138,7 @@ export class TVLabsChannel {
   private unobserveRequest() {
     Object.values(this.events).forEach((event) => {
       this.requestTopic?.off(event);
-    })
+    });
 
     this.requestTopic?.leave();
 
@@ -144,6 +148,8 @@ export class TVLabsChannel {
   private async requestSession(
     capabilities: TVLabsCapabilities,
   ): Promise<string> {
+    log.info('Requesting TV Labs session');
+
     try {
       const response = await this.push<TVLabsSessionRequestResponse>(
         this.lobbyTopic,
@@ -151,7 +157,9 @@ export class TVLabsChannel {
         { capabilities },
       );
 
-      log.info('Received session request ID:', response.request_id);
+      log.info(
+        `Received session request ID: ${response.request_id}. Waiting for a match...`,
+      );
 
       return response.request_id;
     } catch (error) {

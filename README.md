@@ -41,7 +41,6 @@ import { remote } from 'webdriverio';
 const capabilities = { ... };
 
 const wdOpts = {
-  apiKey: process.env.TVLABS_API_TOKEN
   capabilities,
   hostname: 'appium.tvlabs.ai',
   port: 4723,
@@ -50,15 +49,19 @@ const wdOpts = {
   },
 };
 
+const serviceOpts = {
+  apiKey: process.env.TVLABS_API_TOKEN,
+}
+
 async function run() {
-  const service = new TVLabsService(wdOpts, capabilities, {})
+  const service = new TVLabsService(serviceOpts, capabilities, {})
 
   await service.beforeSession(wdOpts, capabilities, [], "")
 
   const driver = await remote(wdOpts);
 
   try {
-    ...
+    // ...
   } finally {
     await driver.deleteSession();
   }
@@ -70,17 +73,20 @@ run();
 ## Options
 
 ### `apiKey`
+
 - **Type:** `string`
 - **Required:** Yes
 - **Description:** TV Labs API key used for authentication to the platform
 
 ### `retries`
+
 - **Type:** `number`
 - **Required:** No
 - **Default:** `3`
 - **Description:** Maximum number of attempts to create a session before failing
 
 ### `reconnectRetries`
+
 - **Type:** `number`
 - **Required:** No
 - **Default:** `5`

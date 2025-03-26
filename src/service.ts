@@ -1,20 +1,15 @@
-import logger from '@wdio/logger';
 import { SevereServiceError } from 'webdriverio';
 import { TVLabsChannel } from './channel.js';
 
 import type { Services, Capabilities, Options } from '@wdio/types';
 import type { TVLabsCapabilities, TVLabsServiceOptions } from './types.js';
 
-const log = logger('TVLabsService');
-
 export default class TVLabsService implements Services.ServiceInstance {
   constructor(
     private _options: TVLabsServiceOptions,
     private _capabilities: Capabilities.ResolvedTestrunnerCapabilities,
     private _config: Options.WebdriverIO,
-  ) {
-    log.debug('Service initialized');
-  }
+  ) {}
 
   async onPrepare(
     _config: Options.Testrunner,
@@ -33,8 +28,6 @@ export default class TVLabsService implements Services.ServiceInstance {
     _specs: string[],
     _cid: string,
   ) {
-    log.debug(`Requesting TV Labs session`);
-
     const channel = new TVLabsChannel(
       this.endpoint(),
       this.reconnectRetries(),
