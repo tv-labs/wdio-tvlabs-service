@@ -102,8 +102,10 @@ export class TVLabsChannel {
         // Information events
         [this.events.REQUEST_FILLED]: ({ session_id, request_id }) => {
           log.info(
-            `Session request ${request_id} filled, session ID: ${session_id}. Waiting for device to be ready...`,
+            `Session request ${request_id} filled: ${this.tvlabsSessionLink(session_id)}`,
           );
+
+          log.info('Waiting for device to be ready...');
         },
         [this.events.REQUEST_MATCHING]: ({ request_id }) => {
           log.info(`Session request ${request_id} matching...`);
@@ -235,5 +237,9 @@ export class TVLabsChannel {
     const code = error && error.code;
 
     log.error('Socket error:', code || error || event);
+  }
+
+  private tvlabsSessionLink(sessionId: string) {
+    return `https://tvlabs.ai/app/sessions/${sessionId}`;
   }
 }
