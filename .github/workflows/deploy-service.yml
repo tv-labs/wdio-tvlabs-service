@@ -20,7 +20,22 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Check auth token
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm whoami
+
       - name: Publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --dry-run
+
+      - name: Publish notification
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          payload: |
+            {
+              "GIT_COMMIT_MESSAGE": ${{ env.COMMIT_MESSAGES_JSON }}
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.PUBLISH_SLACK_WEBHOOK_URL }}
