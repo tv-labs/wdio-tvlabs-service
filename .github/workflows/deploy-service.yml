@@ -41,7 +41,8 @@ jobs:
           payload: |
             {
               "GIT_COMMIT_MESSAGE": ${{ env.COMMIT_MESSAGES_JSON }},
-              "VERSION": ${{ steps.package-version.outputs.version }}
+              "VERSION": ${{ steps.package-version.outputs.version }},
+              "PACKAGE_LINK": "https://www.npmjs.com/package/wdio-tvlabs-service/v/${{ steps.package-version.outputs.version }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.PUBLISH_SLACK_WEBHOOK_URL }}
