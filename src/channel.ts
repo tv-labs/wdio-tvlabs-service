@@ -28,7 +28,7 @@ export class TVLabsChannel {
   } as const;
 
   constructor(
-    private endpoint: string = 'ws://localhost:4000/appium',
+    private endpoint: string,
     private maxReconnectRetries: number,
     private key: string,
   ) {

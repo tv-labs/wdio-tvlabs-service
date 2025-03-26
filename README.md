@@ -19,14 +19,15 @@ yarn add -D wdio-tvlabs-service
 
 To use this as a WebdriverIO test runner service, include the service in your WebdriverIO configuration file (e.g. `wdio.conf.ts`) with your TV Labs API key set in the options.
 
-```
+```javascript
 import TVLabsService from 'wdio-tvlabs-service';
 
 export const config = {
-    ...
+    // ...
     services: [
         [TVLabsService, apiKey: process.env.TVLABS_API_KEY]
-    ]
+    ],
+    // ...
 }
 ```
 
@@ -34,12 +35,13 @@ export const config = {
 
 To use this with WebdriverIO remote but without the test runner, call the beforeSession hook before instantiating the remote.
 
-```
+```javascript
 import { remote } from 'webdriverio';
 
 const capabilities = { ... };
 
 const wdOpts = {
+  apiKey: process.env.TVLABS_API_TOKEN
   capabilities,
   hostname: 'appium.tvlabs.ai',
   port: 4723,
@@ -64,3 +66,22 @@ async function run() {
 
 run();
 ```
+
+## Options
+
+### `apiKey`
+- **Type:** `string`
+- **Required:** Yes
+- **Description:** TV Labs API key used for authentication to the platform
+
+### `retries`
+- **Type:** `number`
+- **Required:** No
+- **Default:** `3`
+- **Description:** Maximum number of attempts to create a session before failing
+
+### `reconnectRetries`
+- **Type:** `number`
+- **Required:** No
+- **Default:** `5`
+- **Description:** Maximum number of attempts to re-connect if the connection to TV Labs is lost.
