@@ -48,14 +48,7 @@ export class TVLabsChannel {
 
     this.socket.connect();
 
-    try {
-      await this.join(this.lobbyTopic);
-    } catch (error) {
-      log.error('Could not connect to TV Labs:', error);
-      throw new SevereServiceError(
-        'Could not connect to TV Labs, please check your connection.',
-      );
-    }
+    await this.join(this.lobbyTopic);
 
     log.debug('Connected to TV Labs!');
   }
@@ -185,7 +178,7 @@ export class TVLabsChannel {
           res();
         })
         .receive('error', ({ response }: PhoenixChannelJoinResponse) => {
-          rej(response);
+          rej(new SevereServiceError("Failed to join topic: " + response));
         })
         .receive('timeout', () => {
           rej('timeout');
