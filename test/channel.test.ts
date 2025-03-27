@@ -149,7 +149,9 @@ describe('TV Labs Channel', () => {
 
     mockReceive('timeout', {});
 
-    await expect(() => channel.newSession(capabilities, 5, 0)).rejects.toThrow(SevereServiceError);
+    await expect(() => channel.newSession(capabilities, 5, 0)).rejects.toThrow(
+      SevereServiceError,
+    );
   });
 
   it('retries on failure to get request id', async () => {

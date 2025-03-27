@@ -46,15 +46,17 @@ export class TVLabsChannel {
   async connect(): Promise<void> {
     try {
       log.debug('Connecting to TV Labs...');
-  
+
       this.socket.connect();
-  
+
       await this.join(this.lobbyTopic);
-  
+
       log.debug('Connected to TV Labs!');
     } catch (error) {
       log.error('Error connecting to TV Labs:', error);
-      throw new SevereServiceError('Could not connect to TV Labs, please check your connection.');
+      throw new SevereServiceError(
+        'Could not connect to TV Labs, please check your connection.',
+      );
     }
   }
 
