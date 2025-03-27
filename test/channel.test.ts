@@ -65,10 +65,20 @@ describe('TV Labs Channel', () => {
     await channel.connect();
 
     mockPushResult({ request_id: requestId });
-    mockPushedEvent('session:ready', {
-      session_id: sessionId,
-      request_id: requestId,
-    });
+    mockPushedEvents([
+      {
+        name: 'session:ready',
+        response: { session_id: sessionId, request_id: requestId },
+      },
+      {
+        name: 'request:matching',
+        response: { request_id: requestId },
+      },
+      {
+        name: 'request:filled',
+        response: { session_id: sessionId, request_id: requestId },
+      },
+    ]);
 
     const result = await channel.newSession(
       {
@@ -108,10 +118,12 @@ describe('TV Labs Channel', () => {
     await channel.connect();
 
     mockPushResult({ request_id: requestId });
-    mockPushedEvent('request:failed', {
-      request_id: requestId,
-      reason: 'Request failed',
-    });
+    mockPushedEvents([
+      {
+        name: 'request:failed',
+        response: { request_id: requestId, reason: 'Request failed' },
+      },
+    ]);
 
     await expect(
       channel.newSession(
@@ -143,11 +155,21 @@ describe('TV Labs Channel', () => {
     await channel.connect();
 
     mockPushResult({ request_id: requestId });
-    mockPushedEvent('session:failed', {
-      request_id: requestId,
-      session_id: sessionId,
-      reason: 'Session failed',
-    });
+    mockPushedEvents([
+      {
+        name: 'request:matching',
+        response: { request_id: requestId },
+      },
+      {
+        name: 'request:filled',
+        response: { session_id: sessionId, request_id: requestId },
+      },
+      {
+        name: 'session:failed',
+        response: { request_id: requestId, session_id: sessionId, reason: 'Session failed',
+        },
+      },
+    ]);
 
     await expect(
       channel.newSession(
@@ -178,10 +200,12 @@ describe('TV Labs Channel', () => {
     await channel.connect();
 
     mockPushResult({ request_id: requestId });
-    mockPushedEvent('request:canceled', {
-      request_id: requestId,
-      reason: 'Request canceled',
-    });
+    mockPushedEvents([
+      {
+        name: 'request:canceled',
+        response: { request_id: requestId, reason: 'Request canceled' },
+      },
+    ]);
 
     await expect(
       channel.newSession(
@@ -231,10 +255,14 @@ function mockPushResult(response: object) {
   });
 }
 
-function mockPushedEvent(name: string, response: object) {
-  fakeChannel.on.mockImplementation((event, handler) => {
-    if (event === name) {
-      handler(response);
+function mockPushedEvents(
+  mockedEvents: Array<{ name: string; response: object }>,
+) {
+  fakeChannel.on.mockImplementation((name, handler) => {
+    const mock = mockedEvents.find((e) => e.name === name);
+
+    if (mock) {
+      handler(mock.response);
     }
 
     return fakeChannel;
