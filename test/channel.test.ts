@@ -4,13 +4,13 @@ import { randomUUID, randomInt } from 'crypto';
 
 import { TVLabsChannel } from '../src/channel';
 
-const fakeEndpoint = "ws://localhost:12345";
+const fakeEndpoint = 'ws://localhost:12345';
 const fakeApiKey = 'my-api-key';
 const reconnectRetries = 5;
 
 vi.mock('phoenix', () => {
   return {
-    Socket: vi.fn().mockImplementation(() => fakeSocket)
+    Socket: vi.fn().mockImplementation(() => fakeSocket),
   };
 });
 
@@ -24,21 +24,32 @@ describe('TV Labs Channel', () => {
   });
 
   it('can be instantiated', () => {
-    const channel = new TVLabsChannel(fakeEndpoint, reconnectRetries, fakeApiKey);
+    const channel = new TVLabsChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
 
     expect(channel).toBeInstanceOf(TVLabsChannel);
   });
 
   it('calls connect and join on connect', async () => {
-    const channel = new TVLabsChannel(fakeEndpoint, reconnectRetries, fakeApiKey);
+    const channel = new TVLabsChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
 
     await channel.connect();
 
-    expect(vi.mocked(phoenix.Socket)).toHaveBeenCalledWith(fakeEndpoint, expect.objectContaining({
-      params: {
-        api_key: fakeApiKey,
-      },
-    }));
+    expect(vi.mocked(phoenix.Socket)).toHaveBeenCalledWith(
+      fakeEndpoint,
+      expect.objectContaining({
+        params: {
+          api_key: fakeApiKey,
+        },
+      }),
+    );
     expect(fakeSocket.connect).toHaveBeenCalledOnce();
     expect(fakeChannel.join).toHaveBeenCalled();
   });
@@ -47,48 +58,75 @@ describe('TV Labs Channel', () => {
     const requestId = randomUUID();
     const sessionId = randomUUID();
 
-    const channel = new TVLabsChannel(fakeEndpoint, reconnectRetries, fakeApiKey);
+    const channel = new TVLabsChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
 
     await channel.connect();
 
-    mockPushResult({ 'request_id': requestId });
-    mockPushedEvent('session:ready', { session_id: sessionId, request_id: requestId });
+    mockPushResult({ request_id: requestId });
+    mockPushedEvent('session:ready', {
+      session_id: sessionId,
+      request_id: requestId,
+    });
 
-    const result = await channel.newSession({
-      'tvlabs:constraints': {
-        'platform_key': 'roku',
+    const result = await channel.newSession(
+      {
+        'tvlabs:constraints': {
+          platform_key: 'roku',
+        },
+        'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122',
       },
-      'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
-    }, 5, 0);
+      5,
+      0,
+    );
 
     expect(result).toEqual(sessionId);
-    expect(fakeChannel.push).toHaveBeenCalledWith('requests:create', expect.objectContaining({
-      capabilities: {
-        'tvlabs:constraints': {
-          'platform_key': 'roku',
+    expect(fakeChannel.push).toHaveBeenCalledWith(
+      'requests:create',
+      expect.objectContaining({
+        capabilities: {
+          'tvlabs:constraints': {
+            platform_key: 'roku',
+          },
+          'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122',
         },
-        'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
-      }
-    }));
+      }),
+    );
   });
 
   it('retries on failed request', async () => {
     const requestId = randomUUID();
     const retries = randomInt(2, 10);
 
-    const channel = new TVLabsChannel(fakeEndpoint, reconnectRetries, fakeApiKey);
+    const channel = new TVLabsChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
 
     await channel.connect();
 
-    mockPushResult({ 'request_id': requestId });
-    mockPushedEvent('request:failed', { request_id: requestId, reason: "Request failed" });
+    mockPushResult({ request_id: requestId });
+    mockPushedEvent('request:failed', {
+      request_id: requestId,
+      reason: 'Request failed',
+    });
 
-    await expect(channel.newSession({
-      'tvlabs:constraints': {
-        'platform_key': 'roku',
-      },
-      'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
-    }, retries, 0)).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
+    await expect(
+      channel.newSession(
+        {
+          'tvlabs:constraints': {
+            platform_key: 'roku',
+          },
+          'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122',
+        },
+        retries,
+        0,
+      ),
+    ).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
 
     expect(fakeChannel.push).toHaveBeenCalledTimes(retries + 1);
   });
@@ -98,19 +136,33 @@ describe('TV Labs Channel', () => {
     const sessionId = randomUUID();
     const retries = randomInt(2, 10);
 
-    const channel = new TVLabsChannel(fakeEndpoint, reconnectRetries, fakeApiKey);
+    const channel = new TVLabsChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
 
     await channel.connect();
 
-    mockPushResult({ 'request_id': requestId });
-    mockPushedEvent('session:failed', { request_id: requestId, session_id: sessionId, reason: "Session failed" });
+    mockPushResult({ request_id: requestId });
+    mockPushedEvent('session:failed', {
+      request_id: requestId,
+      session_id: sessionId,
+      reason: 'Session failed',
+    });
 
-    await expect(channel.newSession({
-      'tvlabs:constraints': {
-        'platform_key': 'roku',
-      },
-      'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
-    }, retries, 0)).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
+    await expect(
+      channel.newSession(
+        {
+          'tvlabs:constraints': {
+            platform_key: 'roku',
+          },
+          'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122',
+        },
+        retries,
+        0,
+      ),
+    ).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
 
     expect(fakeChannel.push).toHaveBeenCalledTimes(retries + 1);
   });
@@ -119,19 +171,32 @@ describe('TV Labs Channel', () => {
     const requestId = randomUUID();
     const retries = randomInt(2, 10);
 
-    const channel = new TVLabsChannel(fakeEndpoint, reconnectRetries, fakeApiKey);
+    const channel = new TVLabsChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
 
     await channel.connect();
 
-    mockPushResult({ 'request_id': requestId });
-    mockPushedEvent('request:canceled', { request_id: requestId, reason: "Request canceled" });
+    mockPushResult({ request_id: requestId });
+    mockPushedEvent('request:canceled', {
+      request_id: requestId,
+      reason: 'Request canceled',
+    });
 
-    await expect(channel.newSession({
-      'tvlabs:constraints': {
-        'platform_key': 'roku',
-      },
-      'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
-    }, retries, 0)).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
+    await expect(
+      channel.newSession(
+        {
+          'tvlabs:constraints': {
+            platform_key: 'roku',
+          },
+          'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122',
+        },
+        retries,
+        0,
+      ),
+    ).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
 
     expect(fakeChannel.push).toHaveBeenCalledTimes(retries + 1);
   });
@@ -149,7 +214,7 @@ const fakeChannel = {
     }
 
     return this;
-  })
+  }),
 };
 
 const fakeSocket = {
@@ -163,7 +228,7 @@ function mockPushResult(response: object) {
     if (e === 'ok') {
       callback(response);
     }
-  
+
     return fakeChannel;
   });
 }
