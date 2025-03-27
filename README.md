@@ -4,7 +4,7 @@
     <source media="(prefers-color-scheme: light)" srcset="assets/tvlabs_light.png">
     <img alt="TV Labs Logo" width="200">
   </picture>
-</p>
+</a>
 
 # wdio-tvlabs-service
 
