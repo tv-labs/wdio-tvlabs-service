@@ -22,14 +22,14 @@
     "url": "https://github.com/tv-labs/wdio-tvlabs-service/issues"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "start": "ts-node src/index.ts",
     "dev": "ts-node --transpile-only src/index.ts",
     "clean": "rm -rf dist",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest --config vitest.config.ts"
   },
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -55,6 +55,7 @@
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.27.0",
+    "vitest": "^3.0.9",
     "webdriverio": "^9.12.1"
   },
   "dependencies": {
