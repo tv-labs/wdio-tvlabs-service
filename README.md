@@ -1,3 +1,13 @@
+<p align="center">
+  <a href="https://tvlabs.ai">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/tvlabs_dark.png">
+      <source media="(prefers-color-scheme: light)" srcset="assets/tvlabs_light.png">
+      <img alt="TV Labs Logo" width="400">
+    </picture>
+  </a>
+</p>
+
 # wdio-tvlabs-service
 
 `wdio-tvlabs-service` is a WebdriverIO test runner service that provides a better integration into TV Labs. When using this service, the WebdriverIO test runner will use a websocket to connect to the TV Labs platform before a session begins, logging events relating to TV Labs session creation as they occur. This offloads the responsibility of creating the TV Labs session from the `POST /session` Webdriver endpoint, leading to more reliable session requests and creation.
