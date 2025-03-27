@@ -1,50 +1,8 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import * as phoenix from 'phoenix';
+import { randomUUID } from 'crypto';
 
 import { TVLabsChannel } from '../src/channel';
-import { TVLabsSessionRequestEventHandler } from '../src/types';
-
-// const receiveMock = {
-//   push: vi.fn().mockReturnThis(),
-//   receive: vi.fn().mockImplementation((event, callback) => {
-//     if (event === 'ok') {
-//       callback({});
-//     }
-
-//     return this;
-//   })
-// }
-
-function createFakeResponse(event: string, response: unknown) {
-  return (e, callback) => {
-    if (e === event) {
-      callback(response);
-    }
-
-    return fakeChannel;
-  }
-}
-
-const fakeChannel = {
-  join: vi.fn().mockReturnThis(),
-  push: vi.fn().mockReturnThis(),
-  on: vi.fn().mockReturnThis(),
-  off: vi.fn().mockReturnThis(),
-  leave: vi.fn().mockReturnThis(),
-  receive: vi.fn().mockImplementation((event, callback) => {
-    if (event === 'ok') {
-      callback({});
-    }
-
-    return this;
-  })
-};
-
-const fakeSocket = {
-  connect: vi.fn(),
-  channel: vi.fn(() => fakeChannel),
-  onError: vi.fn(),
-};
 
 vi.mock('phoenix', () => {
   return {
@@ -82,33 +40,93 @@ describe('TV Labs Channel', () => {
   });
 
   it('can create a new session', async () => {
+    const requestId = randomUUID();
+    const sessionId = randomUUID();
+
     const channel = new TVLabsChannel('ws://localhost:12345', 5, 'my-api-key');
 
     await channel.connect();
 
-    fakeChannel.receive.mockImplementation(createFakeResponse('new_session', {
-      request_id: '1234567890'
-    }));
+    mockSuccessfulRequest(requestId, sessionId);
 
-    // const eventHandlers: Record<string, TVLabsSessionRequestEventHandler> = {};
-    // fakeChannel.on.mockImplementation((event, handler) => {
-    //   eventHandlers[event] = handler;
-    //   return fakeChannel;
-    // });
-
-    const sessionId = await channel.newSession({
+    const result = await channel.newSession({
       'tvlabs:constraints': {
         'platform_key': 'roku',
       },
       'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
     }, 5, 0);
 
-    expect(sessionId).toBeDefined();
-    expect(fakeChannel.push).toHaveBeenCalledWith('new_session', expect.objectContaining({
-      'tvlabs:constraints': {
-        'platform_key': 'roku',
-      },
-      'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
+    expect(result).toEqual(sessionId);
+    expect(fakeChannel.push).toHaveBeenCalledWith('requests:create', expect.objectContaining({
+      capabilities: {
+        'tvlabs:constraints': {
+          'platform_key': 'roku',
+        },
+        'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
+      }
     }));
   })
 });
+
+const fakeChannel = {
+  join: vi.fn().mockReturnThis(),
+  push: vi.fn().mockReturnThis(),
+  on: vi.fn().mockReturnThis(),
+  off: vi.fn().mockReturnThis(),
+  leave: vi.fn().mockReturnThis(),
+  receive: vi.fn().mockImplementation((event, callback) => {
+    if (event === 'ok') {
+      callback({});
+    }
+
+    return this;
+  })
+};
+
+const fakeSocket = {
+  connect: vi.fn(),
+  channel: vi.fn(() => fakeChannel),
+  onError: vi.fn(),
+};
+
+function mockSuccessfulRequest(requestId: string, sessionId: string) {
+  fakeChannel.receive.mockImplementation((e, callback) => {
+    if (e === 'ok') {
+      callback({ request_id: requestId });
+    }
+
+    return fakeChannel;
+  });
+
+  fakeChannel.on.mockImplementation((event, handler) => {
+    if (event === 'session:ready') {
+      handler({
+        request_id: requestId,
+        session_id: sessionId,
+      });
+    }
+
+    return fakeChannel;
+  });
+}
+
+// function mockFailedRequest(requestId: string) {
+//   fakeChannel.receive.mockImplementation((e, callback) => {
+//     if (e === 'ok') {
+//       callback({ request_id: requestId });
+//     }
+
+//     return fakeChannel;
+//   });
+
+//   fakeChannel.on.mockImplementation((event, handler) => {
+//     if (event === 'request:failed') {
+//       handler({
+//         request_id: requestId,
+//         reason: 'Request failed'
+//       });
+//     }
+
+//     return fakeChannel;
+//   });
+// }
