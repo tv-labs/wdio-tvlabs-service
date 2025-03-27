@@ -44,13 +44,20 @@ export class TVLabsChannel {
   }
 
   async connect(): Promise<void> {
-    log.debug('Connecting to TV Labs...');
+    try {
+      log.debug('Connecting to TV Labs...');
 
-    this.socket.connect();
+      this.socket.connect();
 
-    await this.join(this.lobbyTopic);
+      await this.join(this.lobbyTopic);
 
-    log.debug('Connected to TV Labs!');
+      log.debug('Connected to TV Labs!');
+    } catch (error) {
+      log.error('Error connecting to TV Labs:', error);
+      throw new SevereServiceError(
+        'Could not connect to TV Labs, please check your connection.',
+      );
+    }
   }
 
   async newSession(
@@ -93,22 +100,16 @@ export class TVLabsChannel {
       this.requestTopic = this.socket.channel(`requests:${requestId}`);
 
       const eventHandlers: Record<string, TVLabsSessionRequestEventHandler> = {
-        // Ready event
-        [this.events.SESSION_READY]: ({ session_id }) => {
-          log.info(`Session ${session_id} ready!`);
-          res(session_id);
-        },
-
         // Information events
+        [this.events.REQUEST_MATCHING]: ({ request_id }) => {
+          log.info(`Session request ${request_id} matching...`);
+        },
         [this.events.REQUEST_FILLED]: ({ session_id, request_id }) => {
           log.info(
             `Session request ${request_id} filled: ${this.tvlabsSessionLink(session_id)}`,
           );
 
           log.info('Waiting for device to be ready...');
-        },
-        [this.events.REQUEST_MATCHING]: ({ request_id }) => {
-          log.info(`Session request ${request_id} matching...`);
         },
 
         // Failure events
@@ -124,6 +125,12 @@ export class TVLabsChannel {
           log.info(`Session request ${request_id} failed, reason: ${reason}`);
           rej(reason);
         },
+
+        // Ready event
+        [this.events.SESSION_READY]: ({ session_id }) => {
+          log.info(`Session ${session_id} ready!`);
+          res(session_id);
+        },
       };
 
       Object.entries(eventHandlers).forEach(([event, handler]) => {
@@ -131,7 +138,6 @@ export class TVLabsChannel {
       });
 
       this.join(this.requestTopic).catch((err) => {
-        log.error('Error joining request topic:', err);
         rej(err);
       });
     }).finally(cleanup);
@@ -178,7 +184,7 @@ export class TVLabsChannel {
           res();
         })
         .receive('error', ({ response }: PhoenixChannelJoinResponse) => {
-          rej(response);
+          rej('Failed to join topic: ' + response);
         })
         .receive('timeout', () => {
           rej('timeout');

@@ -6,14 +6,16 @@ node_modules
 # GitHub workflows
 .github/**/*
 
-# Development configuration files
+# Development
 .gitignore
 .prettierignore
 .prettierrc
-eslint.config.js
+eslint.config.ts
+vitest.config.ts
 tsconfig.json
 package-lock.json
 .npmignore
+coverage
 
 # Misc
 .DS_Store

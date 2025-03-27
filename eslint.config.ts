@@ -2,9 +2,8 @@ import globals from 'globals';
 import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
-  { ignores: ['dist/**', 'node_modules/**'] },
+const config: tseslint.Config = [
+  { ignores: ['dist/**', 'node_modules/**', 'coverage/**'] },
   { files: ['src/**/*.{js,mjs,cjs,ts}'] },
   {
     rules: {
@@ -23,3 +22,5 @@ export default [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
 ];
+
+export default config;

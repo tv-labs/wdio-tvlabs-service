@@ -11,7 +11,7 @@ export default class TVLabsService implements Services.ServiceInstance {
     private _config: Options.WebdriverIO,
   ) {}
 
-  async onPrepare(
+  onPrepare(
     _config: Options.Testrunner,
     param: Capabilities.TestrunnerCapabilities,
   ) {

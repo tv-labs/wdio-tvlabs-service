@@ -7,7 +7,23 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
-  CheckFormat:
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: './package.json'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test
+
+  Format:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,7 +39,7 @@ jobs:
       - name: Run format check
         run: npm run format:check
 
-  CheckLint:
+  Lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
