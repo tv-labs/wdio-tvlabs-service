@@ -18,8 +18,14 @@ The service first makes a session request, and then subscribes to events for tha
 
 In your WebdriverIO project, run one of the following commands to install:
 
+### NPM
+
 ```
 npm i --save-dev wdio-tvlabs-service
+```
+
+### Yarn
+```
 yarn add -D wdio-tvlabs-service
 ```
 
@@ -66,7 +72,11 @@ const serviceOpts = {
 async function run() {
   const service = new TVLabsService(serviceOpts, capabilities, {})
 
-  await service.beforeSession(wdOpts, capabilities, [], "")
+  // The TV Labs service does not use specs or a cid, pass default values.
+  const cid = ""
+  const specs = []
+
+  await service.beforeSession(wdOpts, capabilities, specs, cid)
 
   const driver = await remote(wdOpts);
 
