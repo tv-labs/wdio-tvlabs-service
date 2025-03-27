@@ -43,7 +43,7 @@ export class TVLabsChannel {
     this.lobbyTopic = this.socket.channel('requests:lobby');
   }
 
-  disconnect(): Promise<void> {
+  async disconnect(): Promise<void> {
     return new Promise((res, _rej) => {
       this.lobbyTopic.leave();
       this.requestTopic?.leave();

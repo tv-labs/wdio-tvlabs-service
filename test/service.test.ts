@@ -133,5 +133,6 @@ describe('TVLabsService', () => {
 
 const fakeTVLabsChannel = {
   connect: vi.fn(),
+  disconnect: vi.fn(),
   newSession: vi.fn(),
 };
