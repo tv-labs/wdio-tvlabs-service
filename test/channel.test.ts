@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import * as phoenix from 'phoenix';
-import { randomUUID } from 'crypto';
+import { randomUUID, randomInt } from 'crypto';
 
 import { TVLabsChannel } from '../src/channel';
 
@@ -47,7 +47,8 @@ describe('TV Labs Channel', () => {
 
     await channel.connect();
 
-    mockSuccessfulRequest(requestId, sessionId);
+    mockPushResult({ 'request_id': requestId });
+    mockPushedEvent('session:ready', { session_id: sessionId, request_id: requestId });
 
     const result = await channel.newSession({
       'tvlabs:constraints': {
@@ -65,7 +66,50 @@ describe('TV Labs Channel', () => {
         'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
       }
     }));
-  })
+  });
+
+  it('retries on failed request', async () => {
+    const requestId = randomUUID();
+    const retries = randomInt(2, 10);
+
+    const channel = new TVLabsChannel('ws://localhost:12345', 5, 'my-api-key');
+
+    await channel.connect();
+
+    mockPushResult({ 'request_id': requestId });
+    mockPushedEvent('request:failed', { request_id: requestId, reason: "Request failed" });
+
+    await expect(channel.newSession({
+      'tvlabs:constraints': {
+        'platform_key': 'roku',
+      },
+      'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
+    }, retries, 0)).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
+
+    expect(fakeChannel.push).toHaveBeenCalledTimes(retries + 1);
+  });
+
+  it('retries on failed session', async () => {
+    const requestId = randomUUID();
+    const sessionId = randomUUID();
+    const retries = randomInt(2, 10);
+
+    const channel = new TVLabsChannel('ws://localhost:12345', 5, 'my-api-key');
+
+    await channel.connect();
+
+    mockPushResult({ 'request_id': requestId });
+    mockPushedEvent('session:failed', { request_id: requestId, session_id: sessionId, reason: "Session failed" });
+
+    await expect(channel.newSession({
+      'tvlabs:constraints': {
+        'platform_key': 'roku',
+      },
+      'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122'
+    }, retries, 0)).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
+
+    expect(fakeChannel.push).toHaveBeenCalledTimes(retries + 1);
+  });
 });
 
 const fakeChannel = {
@@ -89,44 +133,22 @@ const fakeSocket = {
   onError: vi.fn(),
 };
 
-function mockSuccessfulRequest(requestId: string, sessionId: string) {
+function mockPushResult(response: object) {
   fakeChannel.receive.mockImplementation((e, callback) => {
     if (e === 'ok') {
-      callback({ request_id: requestId });
+      callback(response);
     }
-
+  
     return fakeChannel;
   });
+}
 
+function mockPushedEvent(name: string, response: object) {
   fakeChannel.on.mockImplementation((event, handler) => {
-    if (event === 'session:ready') {
-      handler({
-        request_id: requestId,
-        session_id: sessionId,
-      });
+    if (event === name) {
+      handler(response);
     }
 
     return fakeChannel;
   });
 }
-
-// function mockFailedRequest(requestId: string) {
-//   fakeChannel.receive.mockImplementation((e, callback) => {
-//     if (e === 'ok') {
-//       callback({ request_id: requestId });
-//     }
-
-//     return fakeChannel;
-//   });
-
-//   fakeChannel.on.mockImplementation((event, handler) => {
-//     if (event === 'request:failed') {
-//       handler({
-//         request_id: requestId,
-//         reason: 'Request failed'
-//       });
-//     }
-
-//     return fakeChannel;
-//   });
-// }
