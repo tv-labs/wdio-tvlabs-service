@@ -14,5 +14,5 @@
     "strictFunctionTypes": true,
     "skipLibCheck": true
   },
-  "exclude": ["dist", "node_modules", "assets", ".github", ".git"]
+  "exclude": ["dist", "node_modules", "assets", ".github", ".git", "coverage"]
 }
