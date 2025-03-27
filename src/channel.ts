@@ -44,13 +44,18 @@ export class TVLabsChannel {
   }
 
   async connect(): Promise<void> {
-    log.debug('Connecting to TV Labs...');
-
-    this.socket.connect();
-
-    await this.join(this.lobbyTopic);
-
-    log.debug('Connected to TV Labs!');
+    try {
+      log.debug('Connecting to TV Labs...');
+  
+      this.socket.connect();
+  
+      await this.join(this.lobbyTopic);
+  
+      log.debug('Connected to TV Labs!');
+    } catch (error) {
+      log.error('Error connecting to TV Labs:', error);
+      throw new SevereServiceError('Could not connect to TV Labs, please check your connection.');
+    }
   }
 
   async newSession(
@@ -177,7 +182,7 @@ export class TVLabsChannel {
           res();
         })
         .receive('error', ({ response }: PhoenixChannelJoinResponse) => {
-          rej(new SevereServiceError('Failed to join topic: ' + response));
+          rej('Failed to join topic: ' + response);
         })
         .receive('timeout', () => {
           rej('timeout');

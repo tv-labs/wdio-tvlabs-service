@@ -1,6 +1,7 @@
 import * as phoenix from 'phoenix';
 import { randomUUID, randomInt } from 'crypto';
 import { TVLabsChannel } from '../src/channel.js';
+import { SevereServiceError } from 'webdriverio';
 
 const fakeEndpoint = 'ws://localhost:12345';
 const fakeApiKey = 'my-api-key';
@@ -12,8 +13,9 @@ vi.mock('phoenix', () => {
   };
 });
 
-afterEach(() => {
+beforeEach(() => {
   vi.clearAllMocks();
+  mockReceive('ok', {});
 });
 
 describe('TV Labs Channel', () => {
@@ -64,7 +66,7 @@ describe('TV Labs Channel', () => {
 
     await channel.connect();
 
-    mockPushResult({ request_id: requestId });
+    mockReceive('ok', { request_id: requestId });
     mockPushedEvents([
       {
         name: 'session:ready',
@@ -105,6 +107,80 @@ describe('TV Labs Channel', () => {
     );
   });
 
+  it('raises on failed lobby topic join', async () => {
+    const channel = new TVLabsChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
+
+    mockReceive('error', { response: 'unknown error' });
+
+    await expect(() => channel.connect()).rejects.toThrow(SevereServiceError);
+  });
+
+  it('raises on topic join timeout', async () => {
+    const channel = new TVLabsChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
+
+    mockReceive('timeout', {});
+
+    await expect(() => channel.connect()).rejects.toThrow(SevereServiceError);
+  });
+
+  it('raises on push timeout', async () => {
+    const capabilities = {
+      'tvlabs:constraints': {
+        platform_key: 'roku',
+      },
+      'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122',
+    };
+
+    const channel = new TVLabsChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
+
+    await channel.connect();
+
+    mockReceive('timeout', {});
+
+    await expect(() => channel.newSession(capabilities, 5, 0)).rejects.toThrow(SevereServiceError);
+  });
+
+  it('retries on failure to get request id', async () => {
+    const retries = randomInt(2, 10);
+
+    const channel = new TVLabsChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
+
+    await channel.connect();
+
+    mockReceive('error', { response: 'unknown error' });
+
+    await expect(
+      channel.newSession(
+        {
+          'tvlabs:constraints': {
+            platform_key: 'roku',
+          },
+          'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122',
+        },
+        retries,
+        0,
+      ),
+    ).rejects.toThrow(SevereServiceError);
+
+    expect(fakeChannel.push).toHaveBeenCalledTimes(retries + 1);
+  });
+
   it('retries on failed request', async () => {
     const requestId = randomUUID();
     const retries = randomInt(2, 10);
@@ -117,7 +193,7 @@ describe('TV Labs Channel', () => {
 
     await channel.connect();
 
-    mockPushResult({ request_id: requestId });
+    mockReceive('ok', { request_id: requestId });
     mockPushedEvents([
       {
         name: 'request:failed',
@@ -136,7 +212,7 @@ describe('TV Labs Channel', () => {
         retries,
         0,
       ),
-    ).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
+    ).rejects.toThrow(SevereServiceError);
 
     expect(fakeChannel.push).toHaveBeenCalledTimes(retries + 1);
   });
@@ -154,7 +230,7 @@ describe('TV Labs Channel', () => {
 
     await channel.connect();
 
-    mockPushResult({ request_id: requestId });
+    mockReceive('ok', { request_id: requestId });
     mockPushedEvents([
       {
         name: 'request:matching',
@@ -185,7 +261,7 @@ describe('TV Labs Channel', () => {
         retries,
         0,
       ),
-    ).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
+    ).rejects.toThrow(SevereServiceError);
 
     expect(fakeChannel.push).toHaveBeenCalledTimes(retries + 1);
   });
@@ -202,7 +278,7 @@ describe('TV Labs Channel', () => {
 
     await channel.connect();
 
-    mockPushResult({ request_id: requestId });
+    mockReceive('ok', { request_id: requestId });
     mockPushedEvents([
       {
         name: 'request:canceled',
@@ -221,7 +297,7 @@ describe('TV Labs Channel', () => {
         retries,
         0,
       ),
-    ).rejects.toThrow(`Could not create a session after ${retries} attempts.`);
+    ).rejects.toThrow(SevereServiceError);
 
     expect(fakeChannel.push).toHaveBeenCalledTimes(retries + 1);
   });
@@ -248,9 +324,9 @@ const fakeSocket = {
   onError: vi.fn(),
 };
 
-function mockPushResult(response: object) {
+function mockReceive(event: string, response: object) {
   fakeChannel.receive.mockImplementation((e, callback) => {
-    if (e === 'ok') {
+    if (e === event) {
       callback(response);
     }
 
