@@ -3,7 +3,7 @@
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="assets/tvlabs_dark.png">
       <source media="(prefers-color-scheme: light)" srcset="assets/tvlabs_light.png">
-      <img alt="TV Labs Logo" width="300">
+      <img alt="TV Labs Logo" width="400">
     </picture>
   </a>
 </p>
