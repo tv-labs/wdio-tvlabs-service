@@ -25,6 +25,7 @@ npm i --save-dev wdio-tvlabs-service
 ```
 
 ### Yarn
+
 ```
 yarn add -D wdio-tvlabs-service
 ```
