@@ -1,6 +1,5 @@
 import * as phoenix from 'phoenix';
 import { randomUUID, randomInt } from 'crypto';
-
 import { TVLabsChannel } from '../src/channel.js';
 
 const fakeEndpoint = 'ws://localhost:12345';

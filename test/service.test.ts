@@ -1,10 +1,7 @@
-import { randomUUID } from 'crypto';
+import { randomInt, randomUUID } from 'crypto';
+import { SevereServiceError } from 'webdriverio';
 import TVLabsService, { type TVLabsCapabilities } from '../src/index.js';
-
-const fakeTVLabsChannel = {
-  connect: vi.fn(),
-  newSession: vi.fn(),
-};
+import { TVLabsChannel } from '../src/channel.js';
 
 vi.mock('../src/channel', () => {
   return {
@@ -86,5 +83,55 @@ describe('TVLabsService', () => {
       );
       expect(capabilities['tvlabs:session_id']).toEqual(sessionId);
     });
+
+    it('passes set options to the channel', async () => {
+      const config = {};
+      const specs: string[] = [];
+      const cid = '';
+      const capabilities: TVLabsCapabilities = {};
+      const options = {
+        apiKey: randomUUID(),
+        retries: randomInt(1, 10),
+        reconnectRetries: randomInt(1, 10),
+        endpoint: randomUUID(),
+      };
+
+      const service = new TVLabsService(options, capabilities, config);
+
+      await service.beforeSession(config, capabilities, specs, cid);
+
+      expect(vi.mocked(TVLabsChannel)).toHaveBeenCalledWith(
+        options.endpoint,
+        options.reconnectRetries,
+        options.apiKey,
+      );
+      expect(fakeTVLabsChannel.newSession).toHaveBeenCalledWith(
+        capabilities,
+        options.retries,
+      );
+    });
+
+    it('bubbles any errors from the channel', async () => {
+      const config = {};
+      const specs: string[] = [];
+      const cid = '';
+      const options = { apiKey: 'my-api-key' };
+      const capabilities: TVLabsCapabilities = {};
+
+      fakeTVLabsChannel.newSession.mockRejectedValue(
+        new SevereServiceError('Could not create a new session.'),
+      );
+
+      const service = new TVLabsService(options, capabilities, config);
+
+      await expect(
+        service.beforeSession(config, capabilities, specs, cid),
+      ).rejects.toThrow('Could not create a new session.');
+    });
   });
 });
+
+const fakeTVLabsChannel = {
+  connect: vi.fn(),
+  newSession: vi.fn(),
+};
