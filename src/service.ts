@@ -40,6 +40,8 @@ export default class TVLabsService implements Services.ServiceInstance {
       capabilities,
       this.retries(),
     );
+
+    await channel.disconnect();
   }
 
   private endpoint(): string {
