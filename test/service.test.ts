@@ -1,6 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import { randomUUID } from 'crypto';
-import TVLabsService, { type TVLabsCapabilities } from '../src';
+import TVLabsService, { type TVLabsCapabilities } from '../src/index.js';
 
 const fakeTVLabsChannel = {
   connect: vi.fn(),
@@ -38,7 +37,7 @@ describe('TVLabsService', () => {
       const options = { apiKey: 'my-api-key' };
       const config = {};
       const capabilities: TVLabsCapabilities = {};
-  
+
       const service = new TVLabsService(options, capabilities, config);
 
       expect(() => service.onPrepare(config, [capabilities])).not.toThrow();
@@ -63,7 +62,7 @@ describe('TVLabsService', () => {
   describe('beforeSession', () => {
     it('requests a session and modifies the provided capabilities', async () => {
       const config = {};
-      const specs = [];
+      const specs: string[] = [];
       const cid = '';
       const sessionId = randomUUID();
       const options = { apiKey: 'my-api-key' };

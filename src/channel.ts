@@ -52,7 +52,9 @@ export class TVLabsChannel {
       await this.join(this.lobbyTopic);
     } catch (error) {
       log.error('Could not connect to TV Labs:', error);
-      throw new SevereServiceError('Could not connect to TV Labs, please check your connection.');
+      throw new SevereServiceError(
+        'Could not connect to TV Labs, please check your connection.',
+      );
     }
 
     log.debug('Connected to TV Labs!');

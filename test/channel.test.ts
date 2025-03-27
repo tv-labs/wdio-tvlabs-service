@@ -1,8 +1,7 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
 import * as phoenix from 'phoenix';
 import { randomUUID, randomInt } from 'crypto';
 
-import { TVLabsChannel } from '../src/channel';
+import { TVLabsChannel } from '../src/channel.js';
 
 const fakeEndpoint = 'ws://localhost:12345';
 const fakeApiKey = 'my-api-key';

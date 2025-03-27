@@ -22,7 +22,7 @@
     "url": "https://github.com/tv-labs/wdio-tvlabs-service/issues"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p src",
     "start": "ts-node src/index.ts",
     "dev": "ts-node --transpile-only src/index.ts",
     "clean": "rm -rf dist",
