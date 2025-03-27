@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "WebdriverIO service that provides a better integration into TV Labs",
   "author": "Regan Karlewicz <regan@tvlabs.ai>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=18.20.0"
   },
