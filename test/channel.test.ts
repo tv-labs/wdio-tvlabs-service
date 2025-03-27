@@ -166,7 +166,10 @@ describe('TV Labs Channel', () => {
       },
       {
         name: 'session:failed',
-        response: { request_id: requestId, session_id: sessionId, reason: 'Session failed',
+        response: {
+          request_id: requestId,
+          session_id: sessionId,
+          reason: 'Session failed',
         },
       },
     ]);
