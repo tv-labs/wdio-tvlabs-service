@@ -1,14 +1,16 @@
-<div align="center">
+<p align="center">
   <a href="https://tvlabs.ai">
     <img alt="TV Labs Logo" width="200" src="https://tvlabs.ai/images/tvlabs.svg">
   </a>
-  <h1>wdio-tvlabs-service</h1>
-  <p>A <a href="https://webdriver.io/">WebdriverIO</a> service for seamless integration with the <a href="https://tvlabs.ai">TV Labs</a> platform.</p>
-</div>
+</p>
+
+<p align="center">
+  <b>wdio-tvlabs-service</b> is a <a href="https://webdriver.io/">WebdriverIO</a> service for seamless integration with the <a href="https://tvlabs.ai">TV Labs</a> platform.
+</p>
 
 ## Introduction
 
-When using this service, the WebdriverIO test runner will use a websocket to connect to the TV Labs platform before a session begins, logging events relating to TV Labs session creation as they occur. This offloads the responsibility of creating the TV Labs session from the `POST /session` Webdriver endpoint, leading to more reliable session requests and creation.
+The `wdio-tvlabs-service` pacakge uses a websocket to connect to the TV Labs platform before an Appium session begins, logging events relating to TV Labs session creation as they occur. This offloads the responsibility of creating the TV Labs session from the `POST /session` Webdriver endpoint, leading to more reliable session requests and creation.
 
 The service first makes a session request, and then subscribes to events for that request. Once the session has been filled and is ready for the Webdriver script to begin, the service receives a ready event with the TV Labs session ID. This session ID is injected into the capabilities as `tvlabs:session_id` on the Webdriver session create request.
 
