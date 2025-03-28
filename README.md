@@ -40,12 +40,10 @@ To use this as a WebdriverIO test runner service, include the service in your We
 import TVLabsService from '@tvlabs/wdio-service';
 
 export const config = {
-    // ...
-    services: [
-        [TVLabsService, { apiKey: process.env.TVLABS_API_KEY }]
-    ],
-    // ...
-}
+  // ...
+  services: [[TVLabsService, { apiKey: process.env.TVLABS_API_KEY }]],
+  // ...
+};
 ```
 
 ### WebdriverIO Remote
