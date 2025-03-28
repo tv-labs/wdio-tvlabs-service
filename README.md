@@ -10,7 +10,7 @@
 
 ## Introduction
 
-The `wdio-tvlabs-service` pacakge uses a websocket to connect to the TV Labs platform before an Appium session begins, logging events relating to TV Labs session creation as they occur. This offloads the responsibility of creating the TV Labs session from the `POST /session` Webdriver endpoint, leading to more reliable session requests and creation.
+The `wdio-tvlabs-service` package uses a websocket to connect to the TV Labs platform before an Appium session begins, logging events relating to TV Labs session creation as they occur. This offloads the responsibility of creating the TV Labs session from the `POST /session` Webdriver endpoint, leading to more reliable session requests and creation.
 
 The service first makes a session request, and then subscribes to events for that request. Once the session has been filled and is ready for the Webdriver script to begin, the service receives a ready event with the TV Labs session ID. This session ID is injected into the capabilities as `tvlabs:session_id` on the Webdriver session create request.
 
