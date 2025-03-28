@@ -5,12 +5,12 @@
 </p>
 
 <p align="center">
-  <b>wdio-tvlabs-service</b> is a <a href="https://webdriver.io/">WebdriverIO</a> service for seamless integration with the <a href="https://tvlabs.ai">TV Labs</a> platform.
+  <b>@tvlabs/wdio-service</b> is a <a href="https://webdriver.io/">WebdriverIO</a> service for seamless integration with the <a href="https://tvlabs.ai">TV Labs</a> platform.
 </p>
 
 ## Introduction
 
-The `wdio-tvlabs-service` package uses a websocket to connect to the TV Labs platform before an Appium session begins, logging events relating to TV Labs session creation as they occur. This offloads the responsibility of creating the TV Labs session from the `POST /session` Webdriver endpoint, leading to more reliable session requests and creation.
+The `@tvlabs/wdio-service` package uses a websocket to connect to the TV Labs platform before an Appium session begins, logging events relating to TV Labs session creation as they occur. This offloads the responsibility of creating the TV Labs session from the `POST /session` Webdriver endpoint, leading to more reliable session requests and creation.
 
 The service first makes a session request, and then subscribes to events for that request. Once the session has been filled and is ready for the Webdriver script to begin, the service receives a ready event with the TV Labs session ID. This session ID is injected into the capabilities as `tvlabs:session_id` on the Webdriver session create request.
 
@@ -21,13 +21,13 @@ In your WebdriverIO project, run one of the following commands to install:
 ### NPM
 
 ```
-npm i --save wdio-tvlabs-service
+npm i --save @tvlabs/wdio-service
 ```
 
 ### Yarn
 
 ```
-yarn add wdio-tvlabs-service
+yarn add @tvlabs/wdio-service
 ```
 
 ## Usage
@@ -37,7 +37,7 @@ yarn add wdio-tvlabs-service
 To use this as a WebdriverIO test runner service, include the service in your WebdriverIO configuration file (e.g. `wdio.conf.ts`) with your TV Labs API key set in the options.
 
 ```javascript
-import TVLabsService from 'wdio-tvlabs-service';
+import TVLabsService from '@tvlabs/wdio-service';
 
 export const config = {
     // ...
@@ -54,6 +54,7 @@ To use this with WebdriverIO remote but without the test runner, call the before
 
 ```javascript
 import { remote } from 'webdriverio';
+import TVLabsService from '@tvlabs/wdio-service';
 
 const capabilities = { ... };
 
