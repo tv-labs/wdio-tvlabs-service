@@ -45,8 +45,8 @@ jobs:
           payload: |
             {
               "VERSION": "${{ steps.package-version.outputs.version }}",
-              "PACKAGE_LINK": "https://www.npmjs.com/package/wdio-tvlabs-service/v/${{ steps.package-version.outputs.version }}",
-              "PACKAGE_NAME": "wdio-tvlabs-service"
+              "PACKAGE_LINK": "https://www.npmjs.com/package/@tvlabs/wdio-service/v/${{ steps.package-version.outputs.version }}",
+              "PACKAGE_NAME": "@tvlabs/wdio-service"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.PUBLISH_SLACK_WEBHOOK_URL }}
