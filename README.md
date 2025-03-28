@@ -21,13 +21,13 @@ In your WebdriverIO project, run one of the following commands to install:
 ### NPM
 
 ```
-npm i --save-dev wdio-tvlabs-service
+npm i --save wdio-tvlabs-service
 ```
 
 ### Yarn
 
 ```
-yarn add -D wdio-tvlabs-service
+yarn add wdio-tvlabs-service
 ```
 
 ## Usage
