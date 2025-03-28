@@ -1,5 +1,6 @@
 import { SevereServiceError } from 'webdriverio';
 import { TVLabsChannel } from './channel.js';
+import crypto from 'crypto';
 
 import type { Services, Capabilities, Options } from '@wdio/types';
 import type { TVLabsCapabilities, TVLabsServiceOptions } from './types.js';
@@ -9,7 +10,9 @@ export default class TVLabsService implements Services.ServiceInstance {
     private _options: TVLabsServiceOptions,
     private _capabilities: Capabilities.ResolvedTestrunnerCapabilities,
     private _config: Options.WebdriverIO,
-  ) {}
+  ) {
+    this.setupRequestId()
+  }
 
   onPrepare(
     _config: Options.Testrunner,
@@ -42,6 +45,31 @@ export default class TVLabsService implements Services.ServiceInstance {
     );
 
     await channel.disconnect();
+  }
+
+  private setupRequestId() {
+    const originalTransformRequest = this._config.transformRequest;
+
+    this._config.transformRequest = (requestOptions: RequestInit) => {
+      this.setRequestHeader(requestOptions.headers, 'x-request-id', crypto.randomUUID())
+
+      // TODO: how to log the request id?
+      console.log("Added x-request-id to request", requestOptions.headers)
+
+      return originalTransformRequest ? originalTransformRequest(requestOptions) : requestOptions;
+    }
+  }
+
+  private setRequestHeader(headers: RequestInit['headers'], header: string, value: string) {
+    if (headers instanceof Headers) {
+      headers.set('x-request-id', crypto.randomUUID())
+    } else if (typeof headers === 'object') {
+      if (Array.isArray(headers)) {
+        headers.push(['x-request-id', crypto.randomUUID()])
+      } else {
+        headers['x-request-id'] = crypto.randomUUID()
+      }
+    }
   }
 
   private endpoint(): string {
