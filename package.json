@@ -1,5 +1,5 @@
 {
-  "name": "wdio-tvlabs-service",
+  "name": "@tvlabs/wdio-service",
   "version": "0.1.0",
   "description": "WebdriverIO service that provides a better integration into TV Labs",
   "author": "Regan Karlewicz <regan@tvlabs.ai>",
