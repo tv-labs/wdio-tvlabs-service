@@ -42,7 +42,7 @@ import TVLabsService from '@tvlabs/wdio-service';
 export const config = {
     // ...
     services: [
-        [TVLabsService, apiKey: process.env.TVLABS_API_KEY]
+        [TVLabsService, { apiKey: process.env.TVLABS_API_KEY }]
     ],
     // ...
 }
