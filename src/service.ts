@@ -58,7 +58,7 @@ export default class TVLabsService implements Services.ServiceInstance {
   
       this.setRequestHeader(requestOptions.headers, 'x-request-id', requestId)
 
-      // TODO: how to log the request id?
+      // TODO: come up with a better way to log the request id
       log.info("Request ID:", requestId)
 
       return originalTransformRequest ? originalTransformRequest(requestOptions) : requestOptions;
