@@ -61,7 +61,7 @@ export default class TVLabsService implements Services.ServiceInstance {
       // TODO: come up with a better way to log the request id
       log.info('Request ID:', requestId);
 
-      return originalTransformRequest
+      return typeof originalTransformRequest === 'function'
         ? originalTransformRequest(requestOptions)
         : requestOptions;
     };
