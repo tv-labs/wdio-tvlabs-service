@@ -14,7 +14,7 @@ export default class TVLabsService implements Services.ServiceInstance {
     private _capabilities: Capabilities.ResolvedTestrunnerCapabilities,
     private _config: Options.WebdriverIO,
   ) {
-    this.setupRequestId()
+    this.setupRequestId();
   }
 
   onPrepare(
@@ -55,24 +55,30 @@ export default class TVLabsService implements Services.ServiceInstance {
 
     this._config.transformRequest = (requestOptions: RequestInit) => {
       const requestId = crypto.randomUUID();
-  
-      this.setRequestHeader(requestOptions.headers, 'x-request-id', requestId)
+
+      this.setRequestHeader(requestOptions.headers, 'x-request-id', requestId);
 
       // TODO: come up with a better way to log the request id
-      log.info("Request ID:", requestId)
+      log.info('Request ID:', requestId);
 
-      return originalTransformRequest ? originalTransformRequest(requestOptions) : requestOptions;
-    }
+      return originalTransformRequest
+        ? originalTransformRequest(requestOptions)
+        : requestOptions;
+    };
   }
 
-  private setRequestHeader(headers: RequestInit['headers'], header: string, value: string) {
+  private setRequestHeader(
+    headers: RequestInit['headers'],
+    header: string,
+    value: string,
+  ) {
     if (headers instanceof Headers) {
-      headers.set(header, value)
+      headers.set(header, value);
     } else if (typeof headers === 'object') {
       if (Array.isArray(headers)) {
-        headers.push([header, value])
+        headers.push([header, value]);
       } else {
-        headers[header] = value
+        headers[header] = value;
       }
     }
   }
