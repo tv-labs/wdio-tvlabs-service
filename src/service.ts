@@ -1,12 +1,10 @@
 import { SevereServiceError } from 'webdriverio';
 import { TVLabsChannel } from './channel.js';
 import crypto from 'crypto';
-import logger from '@wdio/logger';
+import { log } from './logger.js';
 
 import type { Services, Capabilities, Options } from '@wdio/types';
 import type { TVLabsCapabilities, TVLabsServiceOptions } from './types.js';
-
-const log = logger('wdio-tvlabs-service');
 
 export default class TVLabsService implements Services.ServiceInstance {
   constructor(
