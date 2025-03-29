@@ -1,9 +1,12 @@
 import { SevereServiceError } from 'webdriverio';
 import { TVLabsChannel } from './channel.js';
 import crypto from 'crypto';
+import logger from '@wdio/logger';
 
 import type { Services, Capabilities, Options } from '@wdio/types';
 import type { TVLabsCapabilities, TVLabsServiceOptions } from './types.js';
+
+const log = logger('wdio-tvlabs-service');
 
 export default class TVLabsService implements Services.ServiceInstance {
   constructor(
@@ -51,10 +54,12 @@ export default class TVLabsService implements Services.ServiceInstance {
     const originalTransformRequest = this._config.transformRequest;
 
     this._config.transformRequest = (requestOptions: RequestInit) => {
-      this.setRequestHeader(requestOptions.headers, 'x-request-id', crypto.randomUUID())
+      const requestId = crypto.randomUUID();
+  
+      this.setRequestHeader(requestOptions.headers, 'x-request-id', requestId)
 
       // TODO: how to log the request id?
-      console.log("Added x-request-id to request", requestOptions.headers)
+      log.info("Request ID:", requestId)
 
       return originalTransformRequest ? originalTransformRequest(requestOptions) : requestOptions;
     }
@@ -62,12 +67,12 @@ export default class TVLabsService implements Services.ServiceInstance {
 
   private setRequestHeader(headers: RequestInit['headers'], header: string, value: string) {
     if (headers instanceof Headers) {
-      headers.set('x-request-id', crypto.randomUUID())
+      headers.set(header, value)
     } else if (typeof headers === 'object') {
       if (Array.isArray(headers)) {
-        headers.push(['x-request-id', crypto.randomUUID()])
+        headers.push([header, value])
       } else {
-        headers['x-request-id'] = crypto.randomUUID()
+        headers[header] = value
       }
     }
   }
