@@ -1,7 +1,7 @@
-import { Socket, type Channel } from 'phoenix';
 import WebSocket from 'ws';
-import logger from '@wdio/logger';
+import { Socket, type Channel } from 'phoenix';
 import { SevereServiceError } from 'webdriverio';
+import { log } from './logger.js';
 
 import type {
   TVLabsCapabilities,
@@ -10,8 +10,6 @@ import type {
   TVLabsSessionRequestResponse,
 } from './types.js';
 import type { PhoenixChannelJoinResponse } from './phoenix.js';
-
-const log = logger('wdio-tvlabs-service');
 
 export class TVLabsChannel {
   private socket: Socket;
