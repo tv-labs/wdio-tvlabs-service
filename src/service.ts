@@ -1,5 +1,8 @@
 import { SevereServiceError } from 'webdriverio';
 import { TVLabsChannel } from './channel.js';
+import crypto from 'crypto';
+import { log } from './logger.js';
+import chalk from 'chalk';
 
 import type { Services, Capabilities, Options } from '@wdio/types';
 import type { TVLabsCapabilities, TVLabsServiceOptions } from './types.js';
@@ -9,7 +12,9 @@ export default class TVLabsService implements Services.ServiceInstance {
     private _options: TVLabsServiceOptions,
     private _capabilities: Capabilities.ResolvedTestrunnerCapabilities,
     private _config: Options.WebdriverIO,
-  ) {}
+  ) {
+    this.setupRequestId();
+  }
 
   onPrepare(
     _config: Options.Testrunner,
@@ -42,6 +47,38 @@ export default class TVLabsService implements Services.ServiceInstance {
     );
 
     await channel.disconnect();
+  }
+
+  private setupRequestId() {
+    const originalTransformRequest = this._config.transformRequest;
+
+    this._config.transformRequest = (requestOptions: RequestInit) => {
+      const requestId = crypto.randomUUID();
+
+      this.setRequestHeader(requestOptions.headers, 'x-request-id', requestId);
+
+      log.info(chalk.blue('REQUEST ID'), requestId);
+
+      return typeof originalTransformRequest === 'function'
+        ? originalTransformRequest(requestOptions)
+        : requestOptions;
+    };
+  }
+
+  private setRequestHeader(
+    headers: RequestInit['headers'],
+    header: string,
+    value: string,
+  ) {
+    if (headers instanceof Headers) {
+      headers.set(header, value);
+    } else if (typeof headers === 'object') {
+      if (Array.isArray(headers)) {
+        headers.push([header, value]);
+      } else {
+        headers[header] = value;
+      }
+    }
   }
 
   private endpoint(): string {
