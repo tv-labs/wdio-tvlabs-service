@@ -2,6 +2,7 @@ import { SevereServiceError } from 'webdriverio';
 import { TVLabsChannel } from './channel.js';
 import crypto from 'crypto';
 import { log } from './logger.js';
+import chalk from 'chalk';
 
 import type { Services, Capabilities, Options } from '@wdio/types';
 import type { TVLabsCapabilities, TVLabsServiceOptions } from './types.js';
@@ -53,11 +54,10 @@ export default class TVLabsService implements Services.ServiceInstance {
 
     this._config.transformRequest = (requestOptions: RequestInit) => {
       const requestId = crypto.randomUUID();
-
+      
       this.setRequestHeader(requestOptions.headers, 'x-request-id', requestId);
-
-      // TODO: come up with a better way to log the request id
-      log.info('Request ID:', requestId);
+      
+      log.info(chalk.blue('REQUEST ID'), requestId);
 
       return typeof originalTransformRequest === 'function'
         ? originalTransformRequest(requestOptions)
