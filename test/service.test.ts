@@ -29,8 +29,8 @@ describe('TVLabsService', () => {
     expect(service).toBeInstanceOf(TVLabsService);
   });
 
-  test.todo('sets transformRequest to include a request id')
-  test.todo('does not override existing transformRequest')
+  test.todo('sets transformRequest to include a request id');
+  test.todo('does not override existing transformRequest');
 
   describe('onPrepare', () => {
     it('does not throw if no multi-remote capabilities are provided', () => {
