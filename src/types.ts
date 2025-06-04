@@ -5,6 +5,7 @@ export type TVLabsServiceOptions = {
   endpoint?: string;
   retries?: number;
   reconnectRetries?: number;
+  attachRequestId?: boolean;
 };
 
 export type TVLabsCapabilities =

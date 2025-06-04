@@ -113,3 +113,10 @@ run();
 - **Required:** No
 - **Default:** `5`
 - **Description:** Maximum number of attempts to re-connect if the connection to TV Labs is lost.
+
+### `attachRequestId`
+
+- **Type:** `boolean`
+- **Required:** No
+- **Default:** `true`
+- **Description:** Controls whether or not to attach an `x-request-id` header to each request made to the TV Labs platform.

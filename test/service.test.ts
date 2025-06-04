@@ -53,6 +53,28 @@ describe('TVLabsService', () => {
     });
   });
 
+  it('does not set transformRequest if attachRequestId is false', () => {
+    const options = { apiKey: 'my-api-key', attachRequestId: false };
+    const capabilities: TVLabsCapabilities = {};
+    const config: Options.WebdriverIO = {};
+
+    const service = new TVLabsService(options, capabilities, config);
+
+    expect(service).toBeInstanceOf(TVLabsService);
+    expect(config.transformRequest).toBeDefined();
+    expect(config.transformRequest).toBeInstanceOf(Function);
+
+    const requestInit: RequestInit = {
+      method: 'GET',
+    };
+
+    const transformedRequestInit = config.transformRequest?.(requestInit);
+
+    expect(transformedRequestInit?.headers).toEqual({
+      'x-request-id': expect.any(String),
+    });
+  });
+
   it('does not clobber existing values in headers', () => {
     const options = { apiKey: 'my-api-key' };
     const capabilities: TVLabsCapabilities = {};

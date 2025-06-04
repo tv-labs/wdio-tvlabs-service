@@ -14,7 +14,9 @@ export default class TVLabsService implements Services.ServiceInstance {
     private _capabilities: Capabilities.ResolvedTestrunnerCapabilities,
     private _config: Options.WebdriverIO,
   ) {
-    this.setupRequestId();
+    if (this.attachRequestId()) {
+      this.setupRequestId();
+    }
   }
 
   onPrepare(
@@ -102,6 +104,10 @@ export default class TVLabsService implements Services.ServiceInstance {
 
   private apiKey(): string {
     return this._options.apiKey;
+  }
+
+  private attachRequestId(): boolean {
+    return this._options.attachRequestId || true;
   }
 
   private reconnectRetries(): number {
