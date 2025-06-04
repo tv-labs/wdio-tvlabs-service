@@ -61,18 +61,7 @@ describe('TVLabsService', () => {
     const service = new TVLabsService(options, capabilities, config);
 
     expect(service).toBeInstanceOf(TVLabsService);
-    expect(config.transformRequest).toBeDefined();
-    expect(config.transformRequest).toBeInstanceOf(Function);
-
-    const requestInit: RequestInit = {
-      method: 'GET',
-    };
-
-    const transformedRequestInit = config.transformRequest?.(requestInit);
-
-    expect(transformedRequestInit?.headers).toEqual({
-      'x-request-id': expect.any(String),
-    });
+    expect(config.transformRequest).not.toBeDefined();
   });
 
   it('does not clobber existing values in headers', () => {

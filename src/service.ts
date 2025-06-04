@@ -95,11 +95,11 @@ export default class TVLabsService implements Services.ServiceInstance {
   }
 
   private endpoint(): string {
-    return this._options.endpoint || 'wss://tvlabs.ai/appium';
+    return this._options.endpoint ?? 'wss://tvlabs.ai/appium';
   }
 
   private retries(): number {
-    return this._options.retries || 3;
+    return this._options.retries ?? 3;
   }
 
   private apiKey(): string {
@@ -107,10 +107,10 @@ export default class TVLabsService implements Services.ServiceInstance {
   }
 
   private attachRequestId(): boolean {
-    return this._options.attachRequestId || true;
+    return this._options.attachRequestId ?? true;
   }
 
   private reconnectRetries(): number {
-    return this._options.reconnectRetries || 5;
+    return this._options.reconnectRetries ?? 5;
   }
 }
