@@ -68,9 +68,9 @@ describe('TVLabsService', () => {
       method: 'GET',
       headers: {
         'x-existing-header': 'existing-value',
-      }
+      },
     };
-    
+
     const transformedRequestInit = config.transformRequest?.(requestInit);
 
     expect(transformedRequestInit?.headers).toEqual({
@@ -84,7 +84,7 @@ describe('TVLabsService', () => {
     const capabilities: TVLabsCapabilities = {};
     const config: Options.WebdriverIO = {
       transformRequest: (requestOptions: RequestInit) => {
-        console.log('pre-transform', requestOptions.headers)
+        console.log('pre-transform', requestOptions.headers);
         requestOptions.headers = {
           'x-existing-transform': 'existing-transform-value',
         };
@@ -109,7 +109,7 @@ describe('TVLabsService', () => {
       'x-request-id': expect.any(String),
       'x-existing-transform': 'existing-transform-value',
     });
-  })
+  });
 
   describe('onPrepare', () => {
     it('does not throw if no multi-remote capabilities are provided', () => {

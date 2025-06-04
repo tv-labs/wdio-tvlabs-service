@@ -55,15 +55,20 @@ export default class TVLabsService implements Services.ServiceInstance {
 
     this._config.transformRequest = (requestOptions: RequestInit) => {
       const requestId = crypto.randomUUID();
-      const originalRequestOptions = typeof originalTransformRequest === 'function'
-        ? originalTransformRequest(requestOptions)
-        : requestOptions;
+      const originalRequestOptions =
+        typeof originalTransformRequest === 'function'
+          ? originalTransformRequest(requestOptions)
+          : requestOptions;
 
       if (typeof originalRequestOptions.headers === 'undefined') {
         originalRequestOptions.headers = <HeadersInit>{};
       }
 
-      this.setRequestHeader(originalRequestOptions.headers, 'x-request-id', requestId);
+      this.setRequestHeader(
+        originalRequestOptions.headers,
+        'x-request-id',
+        requestId,
+      );
 
       log.info(chalk.blue('ATTACHED REQUEST ID'), requestId);
 
