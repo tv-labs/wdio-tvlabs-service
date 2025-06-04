@@ -3,7 +3,9 @@ import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 const config: tseslint.Config = [
-  { ignores: ['dist/**', 'node_modules/**', 'coverage/**'] },
+  {
+    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'package-lock.json'],
+  },
   { files: ['src/**/*.{js,mjs,cjs,ts}'] },
   {
     rules: {

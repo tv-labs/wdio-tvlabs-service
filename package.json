@@ -1,6 +1,6 @@
 {
   "name": "@tvlabs/wdio-service",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "WebdriverIO service that provides a better integration into TV Labs",
   "author": "Regan Karlewicz <regan@tvlabs.ai>",
   "license": "Apache-2.0",
@@ -61,6 +61,7 @@
     "webdriverio": "^9.12.1"
   },
   "dependencies": {
+    "chalk": "^5.1.2",
     "phoenix": "^1.7.20",
     "ws": "^8.18.1"
   }

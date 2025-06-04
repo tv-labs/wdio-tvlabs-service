@@ -14,6 +14,8 @@ The `@tvlabs/wdio-service` package uses a websocket to connect to the TV Labs pl
 
 The service first makes a session request, and then subscribes to events for that request. Once the session has been filled and is ready for the Webdriver script to begin, the service receives a ready event with the TV Labs session ID. This session ID is injected into the capabilities as `tvlabs:session_id` on the Webdriver session create request.
 
+Additionally, the service adds a unique request ID for each request made. The service will generate and attach an `x-request-id` header before each request to the TV Labs platform. This can be used to correlate requests in the client side logs to the Appium server logs.
+
 ## Installation
 
 In your WebdriverIO project, run one of the following commands to install:
@@ -111,3 +113,10 @@ run();
 - **Required:** No
 - **Default:** `5`
 - **Description:** Maximum number of attempts to re-connect if the connection to TV Labs is lost.
+
+### `attachRequestId`
+
+- **Type:** `boolean`
+- **Required:** No
+- **Default:** `true`
+- **Description:** Controls whether or not to attach an `x-request-id` header to each request made to the TV Labs platform.

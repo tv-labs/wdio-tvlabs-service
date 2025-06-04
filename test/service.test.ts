@@ -3,6 +3,8 @@ import { SevereServiceError } from 'webdriverio';
 import TVLabsService, { type TVLabsCapabilities } from '../src/index.js';
 import { TVLabsChannel } from '../src/channel.js';
 
+import type { Options } from '@wdio/types';
+
 vi.mock('../src/channel', () => {
   return {
     TVLabsChannel: vi.fn().mockImplementation(() => fakeTVLabsChannel),
@@ -27,6 +29,97 @@ describe('TVLabsService', () => {
     const service = new TVLabsService(options, capabilities, config);
 
     expect(service).toBeInstanceOf(TVLabsService);
+  });
+
+  it('sets transformRequest to include a request id', () => {
+    const options = { apiKey: 'my-api-key' };
+    const capabilities: TVLabsCapabilities = {};
+    const config: Options.WebdriverIO = {};
+
+    const service = new TVLabsService(options, capabilities, config);
+
+    expect(service).toBeInstanceOf(TVLabsService);
+    expect(config.transformRequest).toBeDefined();
+    expect(config.transformRequest).toBeInstanceOf(Function);
+
+    const requestInit: RequestInit = {
+      method: 'GET',
+    };
+
+    const transformedRequestInit = config.transformRequest?.(requestInit);
+
+    expect(transformedRequestInit?.headers).toEqual({
+      'x-request-id': expect.any(String),
+    });
+  });
+
+  it('does not set transformRequest if attachRequestId is false', () => {
+    const options = { apiKey: 'my-api-key', attachRequestId: false };
+    const capabilities: TVLabsCapabilities = {};
+    const config: Options.WebdriverIO = {};
+
+    const service = new TVLabsService(options, capabilities, config);
+
+    expect(service).toBeInstanceOf(TVLabsService);
+    expect(config.transformRequest).not.toBeDefined();
+  });
+
+  it('does not clobber existing values in headers', () => {
+    const options = { apiKey: 'my-api-key' };
+    const capabilities: TVLabsCapabilities = {};
+    const config: Options.WebdriverIO = {};
+
+    const service = new TVLabsService(options, capabilities, config);
+
+    expect(service).toBeInstanceOf(TVLabsService);
+    expect(config.transformRequest).toBeDefined();
+    expect(config.transformRequest).toBeInstanceOf(Function);
+
+    const requestInit: RequestInit = {
+      method: 'GET',
+      headers: {
+        'x-existing-header': 'existing-value',
+      },
+    };
+
+    const transformedRequestInit = config.transformRequest?.(requestInit);
+
+    expect(transformedRequestInit?.headers).toEqual({
+      'x-existing-header': 'existing-value',
+      'x-request-id': expect.any(String),
+    });
+  });
+
+  it('does not override existing transformRequest function', () => {
+    const options = { apiKey: 'my-api-key' };
+    const capabilities: TVLabsCapabilities = {};
+    const config: Options.WebdriverIO = {
+      transformRequest: (requestOptions: RequestInit) => {
+        console.log('pre-transform', requestOptions.headers);
+        requestOptions.headers = {
+          'x-existing-transform': 'existing-transform-value',
+        };
+
+        return requestOptions;
+      },
+    };
+
+    const service = new TVLabsService(options, capabilities, config);
+
+    expect(service).toBeInstanceOf(TVLabsService);
+    expect(config.transformRequest).toBeDefined();
+    expect(config.transformRequest).toBeInstanceOf(Function);
+
+    const requestInit: RequestInit = {
+      method: 'GET',
+    };
+
+    const transformedRequestInit = config.transformRequest?.(requestInit);
+
+    expect(transformedRequestInit?.headers).toEqual({
+      'x-request-id': expect.any(String),
+      'x-existing-transform': 'existing-transform-value',
+    });
   });
 
   describe('onPrepare', () => {
