@@ -1,6 +1,6 @@
-import globals from 'globals';
-import pluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
+import * as globals from 'globals';
+import * as pluginJs from '@eslint/js';
+import * as tseslint from 'typescript-eslint';
 
 const config: tseslint.Config = [
   {

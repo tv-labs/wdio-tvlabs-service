@@ -2,8 +2,7 @@
   "compilerOptions": {
     "target": "es2022",
     "module": "NodeNext",
-    "moduleResolution": "node16",
-    "resolveJsonModule": true,
+    "resolveJsonModule": false,
     "allowJs": true,
     "declaration": true,
     "declarationMap": true,
@@ -14,5 +13,5 @@
     "strictFunctionTypes": true,
     "skipLibCheck": true
   },
-  "exclude": ["dist", "node_modules", ".github", ".git", "coverage"]
+  "exclude": ["dist", "cjs", "esm", "test", "node_modules", ".github", ".git", "coverage"]
 }
