@@ -37,7 +37,7 @@ jobs:
       - name: Publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm run publish
+        run: npm publish --access public --provenance
 
       - name: Publish notification
         uses: slackapi/slack-github-action@v1.26.0
