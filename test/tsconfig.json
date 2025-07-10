@@ -3,6 +3,5 @@
   "compilerOptions": {
     "rootDir": "../",
     "types": ["vitest/globals"]
-  },
-  "include": ["."]
+  }
 }
