@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://tvlabs.ai">
-    <img alt="TV Labs Logo" width="200" src="https://tvlabs.ai/images/tvlabs.svg">
+    <img alt="TV Labs Logo" width="200" src="https://tvlabs.ai/images/tvlabs.svg" />
   </a>
 </p>
 
