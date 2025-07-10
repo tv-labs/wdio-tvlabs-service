@@ -31,7 +31,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint",
-    "test": "vitest --config vitest.config.ts --coverage"
+    "test": "vitest --config vitest.config.ts --coverage",
+    "publish:dry": "npm publish --access public --provenance --dry-run"
   },
   "type": "module",
   "types": "./esm/index.d.ts",
