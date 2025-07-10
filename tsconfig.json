@@ -13,5 +13,5 @@
     "strictFunctionTypes": true,
     "skipLibCheck": true
   },
-  "exclude": ["dist", "cjs", "esm", "test", "node_modules", ".github", ".git", "coverage"]
+  "exclude": ["cjs", "esm", "test", "node_modules", ".github", ".git", "coverage"]
 }

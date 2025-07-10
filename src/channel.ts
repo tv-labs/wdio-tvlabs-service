@@ -1,4 +1,4 @@
-import * as WebSocket from 'ws';
+import { WebSocket } from 'ws';
 import { Socket, type Channel } from 'phoenix';
 import { SevereServiceError } from 'webdriverio';
 import { log } from './logger.js';

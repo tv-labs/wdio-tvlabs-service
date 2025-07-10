@@ -4,7 +4,13 @@ import * as tseslint from 'typescript-eslint';
 
 const config: tseslint.Config = [
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'package-lock.json'],
+    ignores: [
+      'esm/**',
+      'cjs/**',
+      'node_modules/**',
+      'coverage/**',
+      'package-lock.json',
+    ],
   },
   { files: ['src/**/*.{js,mjs,cjs,ts}'] },
   {
