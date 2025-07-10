@@ -1,5 +1,7 @@
 import type { Capabilities } from '@wdio/types';
 
+export type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent';
+
 export type TVLabsServiceOptions = {
   apiKey: string;
   endpoint?: string;

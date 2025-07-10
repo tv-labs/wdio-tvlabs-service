@@ -1,5 +1,4 @@
 # Source files
-src/**/*
 test/**/*
 node_modules
 

@@ -1,6 +1,6 @@
 {
   "name": "@tvlabs/wdio-service",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "WebdriverIO service that provides a better integration into TV Labs",
   "author": "Regan Karlewicz <regan@tvlabs.ai>",
   "license": "Apache-2.0",
@@ -22,23 +22,24 @@
     "url": "https://github.com/tv-labs/wdio-tvlabs-service/issues"
   },
   "scripts": {
-    "build": "tsc -p src",
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc -p src --module commonjs --moduleResolution node --outDir cjs && echo '{\"type\": \"commonjs\"}' > cjs/package.json",
+    "build:esm": "tsc -p src --outDir esm && echo '{\"type\": \"module\"}' > esm/package.json",
     "start": "ts-node src/index.ts",
     "dev": "ts-node --transpile-only src/index.ts",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf cjs && rm -rf esm",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint",
     "test": "vitest --config vitest.config.ts --coverage"
   },
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "types": "./esm/index.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+    "require": "./cjs/index.js",
+    "import": "./esm/index.js"
   },
+  "main": "cjs/index.js",
   "typeScriptVersion": "5.8.2",
   "devDependencies": {
     "@eslint/js": "^9.22.0",

@@ -95,7 +95,6 @@ describe('TVLabsService', () => {
     const capabilities: TVLabsCapabilities = {};
     const config: Options.WebdriverIO = {
       transformRequest: (requestOptions: RequestInit) => {
-        console.log('pre-transform', requestOptions.headers);
         requestOptions.headers = {
           'x-existing-transform': 'existing-transform-value',
         };
@@ -178,7 +177,7 @@ describe('TVLabsService', () => {
     });
 
     it('passes set options to the channel', async () => {
-      const config = {};
+      const config: Options.WebdriverIO = { logLevel: 'info' };
       const specs: string[] = [];
       const cid = '';
       const capabilities: TVLabsCapabilities = {};
@@ -197,6 +196,7 @@ describe('TVLabsService', () => {
         options.endpoint,
         options.reconnectRetries,
         options.apiKey,
+        config.logLevel,
       );
       expect(fakeTVLabsChannel.newSession).toHaveBeenCalledWith(
         capabilities,

@@ -1,13 +1,14 @@
-import WebSocket from 'ws';
+import { WebSocket } from 'ws';
 import { Socket, type Channel } from 'phoenix';
 import { SevereServiceError } from 'webdriverio';
-import { log } from './logger.js';
+import { Logger } from './logger.js';
 
 import type {
   TVLabsCapabilities,
   TVLabsSessionChannelParams,
   TVLabsSessionRequestEventHandler,
   TVLabsSessionRequestResponse,
+  LogLevel,
 } from './types.js';
 import type { PhoenixChannelJoinResponse } from './phoenix.js';
 
@@ -15,6 +16,7 @@ export class TVLabsChannel {
   private socket: Socket;
   private lobbyTopic: Channel;
   private requestTopic?: Channel;
+  private log: Logger;
 
   private readonly events = {
     SESSION_READY: 'session:ready',
@@ -29,7 +31,9 @@ export class TVLabsChannel {
     private endpoint: string,
     private maxReconnectRetries: number,
     private key: string,
+    private logLevel: LogLevel,
   ) {
+    this.log = new Logger('@tvlabs/wdio-channel', this.logLevel);
     this.socket = new Socket(this.endpoint, {
       transport: WebSocket,
       params: this.params(),
@@ -51,15 +55,15 @@ export class TVLabsChannel {
 
   async connect(): Promise<void> {
     try {
-      log.debug('Connecting to TV Labs...');
+      this.log.debug('Connecting to TV Labs...');
 
       this.socket.connect();
 
       await this.join(this.lobbyTopic);
 
-      log.debug('Connected to TV Labs!');
+      this.log.debug('Connected to TV Labs!');
     } catch (error) {
-      log.error('Error connecting to TV Labs:', error);
+      this.log.error('Error connecting to TV Labs:', error);
       throw new SevereServiceError(
         'Could not connect to TV Labs, please check your connection.',
       );
@@ -87,7 +91,7 @@ export class TVLabsChannel {
     retry: number,
   ): Promise<string> {
     if (retry < maxRetries) {
-      log.warn(
+      this.log.warn(
         `Could not create a session, retrying (${retry + 1}/${maxRetries})`,
       );
 
@@ -108,33 +112,37 @@ export class TVLabsChannel {
       const eventHandlers: Record<string, TVLabsSessionRequestEventHandler> = {
         // Information events
         [this.events.REQUEST_MATCHING]: ({ request_id }) => {
-          log.info(`Session request ${request_id} matching...`);
+          this.log.info(`Session request ${request_id} matching...`);
         },
         [this.events.REQUEST_FILLED]: ({ session_id, request_id }) => {
-          log.info(
+          this.log.info(
             `Session request ${request_id} filled: ${this.tvlabsSessionLink(session_id)}`,
           );
 
-          log.info('Waiting for device to be ready...');
+          this.log.info('Waiting for device to be ready...');
         },
 
         // Failure events
         [this.events.SESSION_FAILED]: ({ session_id, reason }) => {
-          log.error(`Session ${session_id} failed, reason: ${reason}`);
+          this.log.error(`Session ${session_id} failed, reason: ${reason}`);
           rej(reason);
         },
         [this.events.REQUEST_CANCELED]: ({ request_id, reason }) => {
-          log.info(`Session request ${request_id} canceled, reason: ${reason}`);
+          this.log.info(
+            `Session request ${request_id} canceled, reason: ${reason}`,
+          );
           rej(reason);
         },
         [this.events.REQUEST_FAILED]: ({ request_id, reason }) => {
-          log.info(`Session request ${request_id} failed, reason: ${reason}`);
+          this.log.info(
+            `Session request ${request_id} failed, reason: ${reason}`,
+          );
           rej(reason);
         },
 
         // Ready event
         [this.events.SESSION_READY]: ({ session_id }) => {
-          log.info(`Session ${session_id} ready!`);
+          this.log.info(`Session ${session_id} ready!`);
           res(session_id);
         },
       };
@@ -162,7 +170,7 @@ export class TVLabsChannel {
   private async requestSession(
     capabilities: TVLabsCapabilities,
   ): Promise<string> {
-    log.info('Requesting TV Labs session');
+    this.log.info('Requesting TV Labs session');
 
     try {
       const response = await this.push<TVLabsSessionRequestResponse>(
@@ -171,13 +179,13 @@ export class TVLabsChannel {
         { capabilities },
       );
 
-      log.info(
+      this.log.info(
         `Received session request ID: ${response.request_id}. Waiting for a match...`,
       );
 
       return response.request_id;
     } catch (error) {
-      log.error('Error requesting session:', error);
+      this.log.error('Error requesting session:', error);
       throw error;
     }
   }
@@ -233,7 +241,7 @@ export class TVLabsChannel {
 
     const wait = [0, 1000, 3000, 5000][tries] || 10000;
 
-    log.info(
+    this.log.info(
       `[${tries}/${this.maxReconnectRetries}] Waiting ${wait}ms before re-attempting to connect...`,
     );
 
@@ -248,7 +256,7 @@ export class TVLabsChannel {
     const error = event.error;
     const code = error && error.code;
 
-    log.error('Socket error:', code || error || event);
+    this.log.error('Socket error:', code || error || event);
   }
 
   private tvlabsSessionLink(sessionId: string) {

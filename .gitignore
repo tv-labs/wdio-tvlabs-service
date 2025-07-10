@@ -1,4 +1,8 @@
+# Development files
 node_modules
-dist
 .DS_Store
 coverage
+
+# Distribution directories
+esm
+cjs

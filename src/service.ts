@@ -1,19 +1,26 @@
 import { SevereServiceError } from 'webdriverio';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import chalk from 'chalk';
 
 import { TVLabsChannel } from './channel.js';
-import { log } from './logger.js';
+import { Logger } from './logger.js';
 
 import type { Services, Capabilities, Options } from '@wdio/types';
-import type { TVLabsCapabilities, TVLabsServiceOptions } from './types.js';
+import type {
+  TVLabsCapabilities,
+  TVLabsServiceOptions,
+  LogLevel,
+} from './types.js';
 
 export default class TVLabsService implements Services.ServiceInstance {
+  private log: Logger;
+
   constructor(
     private _options: TVLabsServiceOptions,
     private _capabilities: Capabilities.ResolvedTestrunnerCapabilities,
     private _config: Options.WebdriverIO,
   ) {
+    this.log = new Logger('@tvlabs/wdio-server', this._config.logLevel);
     if (this.attachRequestId()) {
       this.setupRequestId();
     }
@@ -40,6 +47,7 @@ export default class TVLabsService implements Services.ServiceInstance {
       this.endpoint(),
       this.reconnectRetries(),
       this.apiKey(),
+      this.logLevel(),
     );
 
     await channel.connect();
@@ -72,7 +80,7 @@ export default class TVLabsService implements Services.ServiceInstance {
         requestId,
       );
 
-      log.info(chalk.blue('ATTACHED REQUEST ID'), requestId);
+      this.log.info(chalk.blue('ATTACHED REQUEST ID'), requestId);
 
       return originalRequestOptions;
     };
@@ -104,6 +112,10 @@ export default class TVLabsService implements Services.ServiceInstance {
 
   private apiKey(): string {
     return this._options.apiKey;
+  }
+
+  private logLevel(): LogLevel {
+    return this._config.logLevel ?? 'info';
   }
 
   private attachRequestId(): boolean {
