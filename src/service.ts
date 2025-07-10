@@ -1,5 +1,5 @@
 import { SevereServiceError } from 'webdriverio';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import chalk from 'chalk';
 
 import { TVLabsChannel } from './channel.js';
