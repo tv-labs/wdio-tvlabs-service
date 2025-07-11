@@ -40,7 +40,9 @@ export class TVLabsChannel {
       reconnectAfterMs: this.reconnectAfterMs.bind(this),
     });
 
-    this.socket.onError(this.logSocketError);
+    this.socket.onError((...args) =>
+      TVLabsChannel.logSocketError(this.log, ...args),
+    );
 
     this.lobbyTopic = this.socket.channel('requests:lobby');
   }
@@ -248,18 +250,18 @@ export class TVLabsChannel {
     return wait;
   }
 
-  private logSocketError(
+  private tvlabsSessionLink(sessionId: string) {
+    return `https://tvlabs.ai/app/sessions/${sessionId}`;
+  }
+
+  private static logSocketError(
+    log: Logger,
     event: ErrorEvent,
     _transport: new (endpoint: string) => object,
     _establishedConnections: number,
   ) {
     const error = event.error;
-    const code = error && error.code;
 
-    this.log.error('Socket error:', code || error || event);
-  }
-
-  private tvlabsSessionLink(sessionId: string) {
-    return `https://tvlabs.ai/app/sessions/${sessionId}`;
+    log.error('Socket error:', error || event);
   }
 }

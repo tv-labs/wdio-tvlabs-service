@@ -1,17 +1,7 @@
 import type { LogLevel } from './types.js';
-import chalk from 'chalk';
 
 // TODO: Replace this with @wdio/logger
 // It is currently not compatible with CJS
-
-const LOG_LEVEL_COLORS: Record<LogLevel, typeof chalk> = {
-  error: chalk.red,
-  warn: chalk.yellow,
-  info: chalk.cyanBright,
-  debug: chalk.green,
-  trace: chalk.cyan,
-  silent: chalk.gray,
-};
 
 const LOG_LEVELS: Record<LogLevel, number> = {
   error: 0,
@@ -37,8 +27,7 @@ export class Logger {
 
   private formatMessage(level: LogLevel, ...args: unknown[]): string {
     const timestamp = new Date().toISOString();
-    const levelColor = LOG_LEVEL_COLORS[level];
-    return `${chalk.gray(timestamp)} ${levelColor(level.toUpperCase())} ${chalk.white(this.name)}: ${args
+    return `${timestamp} ${level.toUpperCase()} ${this.name}: ${args
       .map((arg) =>
         typeof arg === 'object' ? JSON.stringify(arg) : String(arg),
       )

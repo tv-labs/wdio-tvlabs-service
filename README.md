@@ -39,7 +39,7 @@ yarn add @tvlabs/wdio-service
 To use this as a WebdriverIO test runner service, include the service in your WebdriverIO configuration file (e.g. `wdio.conf.ts`) with your TV Labs API key set in the options.
 
 ```javascript
-import TVLabsService from '@tvlabs/wdio-service';
+import { TVLabsService } from '@tvlabs/wdio-service';
 
 export const config = {
   // ...
@@ -54,7 +54,7 @@ To use this with WebdriverIO remote but without the test runner, call the before
 
 ```javascript
 import { remote } from 'webdriverio';
-import TVLabsService from '@tvlabs/wdio-service';
+import { TVLabsService } from '@tvlabs/wdio-service';
 
 const capabilities = { ... };
 

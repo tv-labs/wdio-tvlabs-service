@@ -1,6 +1,5 @@
 import { SevereServiceError } from 'webdriverio';
 import * as crypto from 'crypto';
-import chalk from 'chalk';
 
 import { TVLabsChannel } from './channel.js';
 import { Logger } from './logger.js';
@@ -80,7 +79,7 @@ export default class TVLabsService implements Services.ServiceInstance {
         requestId,
       );
 
-      this.log.info(chalk.blue('ATTACHED REQUEST ID'), requestId);
+      this.log.info('ATTACHED REQUEST ID', requestId);
 
       return originalRequestOptions;
     };
