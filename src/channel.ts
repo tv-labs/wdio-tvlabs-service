@@ -41,7 +41,7 @@ export class TVLabsChannel {
     });
 
     this.socket.onError((...args) =>
-      TVLabsChannel.logSocketError(...args, this.log),
+      TVLabsChannel.logSocketError(this.log, ...args),
     );
 
     this.lobbyTopic = this.socket.channel('requests:lobby');
@@ -255,10 +255,10 @@ export class TVLabsChannel {
   }
 
   private static logSocketError(
+    log: Logger,
     event: ErrorEvent,
     _transport: new (endpoint: string) => object,
     _establishedConnections: number,
-    log: Logger,
   ) {
     const error = event.error;
 
