@@ -2,10 +2,11 @@ import { WebSocket } from 'ws';
 import { Socket, type Channel } from 'phoenix';
 import { SevereServiceError } from 'webdriverio';
 import { Logger } from './logger.js';
+import { getServiceInfo } from './utils.js';
 
 import type {
   TVLabsCapabilities,
-  TVLabsSessionChannelParams,
+  TVLabsSocketParams,
   TVLabsSessionRequestEventHandler,
   TVLabsSessionRequestResponse,
   LogLevel,
@@ -31,7 +32,7 @@ export class TVLabsChannel {
     private endpoint: string,
     private maxReconnectRetries: number,
     private key: string,
-    private logLevel: LogLevel,
+    private logLevel: LogLevel = 'info',
   ) {
     this.log = new Logger('@tvlabs/wdio-channel', this.logLevel);
     this.socket = new Socket(this.endpoint, {
@@ -228,8 +229,13 @@ export class TVLabsChannel {
     });
   }
 
-  private params(): TVLabsSessionChannelParams {
+  private params(): TVLabsSocketParams {
+    const serviceInfo = getServiceInfo();
+
+    this.log.debug('Info:', serviceInfo);
+
     return {
+      ...serviceInfo,
       api_key: this.key,
     };
   }

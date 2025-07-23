@@ -41,6 +41,11 @@ export type TVLabsSessionRequestResponse = {
   request_id: string;
 };
 
-export type TVLabsSessionChannelParams = {
+export type TVLabsSocketParams = TVLabsServiceInfo & {
   api_key: string;
+};
+
+export type TVLabsServiceInfo = {
+  service_version: string;
+  service_name: string;
 };
