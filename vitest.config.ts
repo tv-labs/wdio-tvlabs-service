@@ -8,5 +8,8 @@ export default defineConfig({
     typecheck: {
       tsconfig: './test/tsconfig.json',
     },
+    coverage: {
+      include: ['src/**/*.ts'],
+    },
   },
 });
