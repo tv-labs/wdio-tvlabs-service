@@ -21,8 +21,8 @@ const plugins = (outDir) => [
     preferBuiltins: true,
     exportConditions: ['node'],
   }),
-  commonjs(),
   json(),
+  commonjs(),
   typescript({
     tsconfig: 'src/tsconfig.json',
     outDir,
