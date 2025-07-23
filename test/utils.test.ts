@@ -1,18 +1,20 @@
 import { join } from 'path';
-import { getServiceVersion } from '../src/utils.js';
+import { getServiceName, getServiceVersion } from '../src/utils.js';
 import { promises as fs } from 'fs';
+
+const packageJson = await fs.readFile(
+  join(__dirname, '..', 'package.json'),
+  'utf8',
+);
+const packageObject = JSON.parse(packageJson);
 
 describe('TV Labs Utils', () => {
   it('can get the service version', async () => {
-    const packageJson = await fs.readFile(
-      join(__dirname, '..', 'package.json'),
-      'utf8',
-    );
-    const packageObject = JSON.parse(packageJson);
+    expect(getServiceVersion()).not.toBe('unknown');
+    expect(getServiceVersion()).toBe(packageObject.version);
+  });
 
-    const version = getServiceVersion();
-
-    expect(version).not.toBe('unknown');
-    expect(version).toBe(packageObject.version);
+  it('can get the service name', async () => {
+    expect(getServiceName()).toBe('@tvlabs/wdio-service');
   });
 });

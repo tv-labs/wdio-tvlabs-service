@@ -2,7 +2,7 @@ import { WebSocket } from 'ws';
 import { Socket, type Channel } from 'phoenix';
 import { SevereServiceError } from 'webdriverio';
 import { Logger } from './logger.js';
-import { getServiceVersion } from './utils.js';
+import { getServiceInfo } from './utils.js';
 
 import type {
   TVLabsCapabilities,
@@ -231,8 +231,8 @@ export class TVLabsChannel {
 
   private params(): TVLabsSocketParams {
     return {
+      ...getServiceInfo(),
       api_key: this.key,
-      service_version: getServiceVersion(),
     };
   }
 
