@@ -15,5 +15,14 @@
     "strictFunctionTypes": true,
     "skipLibCheck": true
   },
-  "exclude": ["cjs", "esm", "node_modules", ".github", ".git", "coverage", "*.config.*", ".*rc"]
+  "exclude": [
+    "cjs",
+    "esm",
+    "node_modules",
+    ".github",
+    ".git",
+    "coverage",
+    "*.config.*",
+    ".*rc"
+  ]
 }
