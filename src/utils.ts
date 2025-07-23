@@ -1,10 +1,5 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
 import { TVLabsServiceInfo } from './types.js';
-
-const packageJson = JSON.parse(
-  readFileSync(join(__dirname, '..', 'package.json'), 'utf8'),
-);
+import packageJson from '../package.json' with { type: 'json' };
 
 export function getServiceInfo(): TVLabsServiceInfo {
   return {
