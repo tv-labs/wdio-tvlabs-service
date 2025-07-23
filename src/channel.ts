@@ -230,8 +230,12 @@ export class TVLabsChannel {
   }
 
   private params(): TVLabsSocketParams {
+    const serviceInfo = getServiceInfo();
+
+    this.log.debug('Info:', serviceInfo);
+
     return {
-      ...getServiceInfo(),
+      ...serviceInfo,
       api_key: this.key,
     };
   }
