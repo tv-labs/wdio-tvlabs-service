@@ -9,7 +9,7 @@ export default defineConfig({
       tsconfig: './test/tsconfig.json',
     },
     coverage: {
-      exclude: ['cjs/**', 'esm/**', '*.config.ts'],
+      include: ['src/**/*.ts'],
     },
   },
 });
