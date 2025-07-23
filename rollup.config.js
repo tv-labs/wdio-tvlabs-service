@@ -25,10 +25,6 @@ const plugins = (outDir) => [
   json(),
   typescript({
     tsconfig: 'src/tsconfig.json',
-    compilerOptions: {
-      module: 'ES2022',
-      moduleResolution: 'node',
-    },
     outDir,
   }),
   createPackageJson(outDir, outDir === 'esm' ? 'module' : 'commonjs'),

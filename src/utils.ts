@@ -1,5 +1,5 @@
 import { TVLabsServiceInfo } from './types.js';
-import packageJson from '../package.json' with { type: 'json' };
+import packageJson from '../package.json';
 
 export function getServiceInfo(): TVLabsServiceInfo {
   return {
