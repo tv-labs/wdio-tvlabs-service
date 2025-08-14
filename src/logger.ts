@@ -68,7 +68,7 @@ export class Logger {
             const props: Record<string, unknown> = {};
             keys.forEach((key) => {
               try {
-                const value = (arg as any)[key];
+                const value = (arg as Record<string, unknown>)[key];
                 if (value instanceof Error) {
                   props[key] = `${value.name}: ${value.message}`;
                 } else {

@@ -42,7 +42,10 @@ describe('Logger', () => {
 
     it('should handle Error objects with additional properties', () => {
       const logger = new Logger('test', 'debug');
-      const customError = new Error('Custom error message') as any;
+      const customError = new Error('Custom error message') as Error & {
+        code?: string;
+        statusCode?: number;
+      };
       customError.code = 'CUSTOM_CODE';
       customError.statusCode = 500;
 
