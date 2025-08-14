@@ -266,8 +266,6 @@ export class TVLabsChannel {
     _transport: new (endpoint: string) => object,
     _establishedConnections: number,
   ) {
-    const error = event.error;
-
-    log.error('Socket error:', error || event);
+    log.error('Socket error:', event.error);
   }
 }
