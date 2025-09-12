@@ -56,22 +56,22 @@ To use this with WebdriverIO remote but without the test runner, call the before
 import { remote } from 'webdriverio';
 import { TVLabsService } from '@tvlabs/wdio-service';
 
-const capabilities = { ... };
-
-const wdOpts = {
-  capabilities,
-  hostname: 'appium.tvlabs.ai',
-  port: 4723,
-  headers: {
-    Authorization: `Bearer ${process.env.TVLABS_API_TOKEN}`,
-  },
-};
-
-const serviceOpts = {
-  apiKey: process.env.TVLABS_API_TOKEN,
-}
-
 async function run() {
+  const capabilities = { ... };
+
+  const wdOpts = {
+    capabilities,
+    hostname: 'appium.tvlabs.ai',
+    port: 4723,
+    headers: {
+      Authorization: `Bearer ${process.env.TVLABS_API_TOKEN}`,
+    },
+  };
+
+  const serviceOpts = {
+    apiKey: process.env.TVLABS_API_TOKEN,
+  }
+
   const service = new TVLabsService(serviceOpts, capabilities, {})
 
   // The TV Labs service does not use specs or a cid, pass default values.
