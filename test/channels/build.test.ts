@@ -25,7 +25,6 @@ vi.mock('node:fs', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockReceive('ok', {});
 
   vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as fs.Stats);
   vi.mocked(fs.readFileSync).mockReturnValue(Buffer.from('fake-file-content'));
@@ -58,6 +57,8 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
     expect(vi.mocked(phoenix.Socket)).toHaveBeenCalledWith(
@@ -85,29 +86,15 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    fakeChannel.push
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ url: uploadUrl, build_id: buildId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      })
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ application_id: applicationId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      });
+    // Request upload URL response
+    mockPushReceive('ok', { url: uploadUrl, build_id: buildId });
+
+    // Extract build info response
+    mockPushReceive('ok', { application_id: applicationId });
 
     const result = await channel.uploadBuild(testBuildPath, testAppSlug);
 
@@ -151,29 +138,15 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    fakeChannel.push
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ url: uploadUrl, build_id: buildId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      })
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ application_id: applicationId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      });
+    // Request upload URL response
+    mockPushReceive('ok', { url: uploadUrl, build_id: buildId });
+
+    // Extract build info response
+    mockPushReceive('ok', { application_id: applicationId });
 
     const result = await channel.uploadBuild(testBuildPath);
 
@@ -216,29 +189,15 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    fakeChannel.push
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ url: uploadUrl, build_id: buildId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      })
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ application_id: applicationId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      });
+    // Request upload URL response
+    mockPushReceive('ok', { url: uploadUrl, build_id: buildId });
+
+    // Extract build info response
+    mockPushReceive('ok', { application_id: applicationId });
 
     await channel.uploadBuild('/path/to/test.zip');
 
@@ -265,29 +224,15 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    fakeChannel.push
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ url: uploadUrl, build_id: buildId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      })
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ application_id: applicationId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      });
+    // Request upload URL response
+    mockPushReceive('ok', { url: uploadUrl, build_id: buildId });
+
+    // Extract build info response
+    mockPushReceive('ok', { application_id: applicationId });
 
     await channel.uploadBuild('/path/to/test.apk');
 
@@ -314,29 +259,15 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    fakeChannel.push
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ url: uploadUrl, build_id: buildId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      })
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ application_id: applicationId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      });
+    // Request upload URL response
+    mockPushReceive('ok', { url: uploadUrl, build_id: buildId });
+
+    // Extract build info response
+    mockPushReceive('ok', { application_id: applicationId });
 
     await channel.uploadBuild('/path/to/test.unknown');
 
@@ -359,7 +290,7 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
-    mockReceive('error', { response: 'unknown error' });
+    mockJoinReceive('error', { response: 'unknown error' });
 
     await expect(() => channel.connect()).rejects.toThrow(SevereServiceError);
   });
@@ -371,7 +302,7 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
-    mockReceive('timeout', {});
+    mockJoinReceive('timeout', {});
 
     await expect(() => channel.connect()).rejects.toThrow(SevereServiceError);
   });
@@ -383,21 +314,11 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    const mockReceiveChain = {
-      receive: vi
-        .fn()
-        .mockImplementation((type: string, callback: () => void) => {
-          if (type === 'timeout') {
-            // Call the callback immediately to trigger the timeout behavior
-            callback();
-          }
-          return mockReceiveChain;
-        }),
-    };
-
-    fakeChannel.push.mockImplementation(() => mockReceiveChain);
+    mockPushReceive('timeout', {});
 
     await expect(() => channel.uploadBuild(testBuildPath)).rejects.toThrow();
   });
@@ -409,23 +330,11 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    const mockReceiveChain = {
-      receive: vi
-        .fn()
-        .mockImplementation(
-          (type: string, callback: (reason: string) => void) => {
-            if (type === 'error') {
-              // Call the callback immediately to trigger the error behavior
-              callback('Mock error');
-            }
-            return mockReceiveChain;
-          },
-        ),
-    };
-
-    fakeChannel.push.mockImplementation(() => mockReceiveChain);
+    mockPushReceive('error', { reason: 'Mock error' });
 
     await expect(() => channel.uploadBuild(testBuildPath)).rejects.toThrow();
   });
@@ -440,17 +349,11 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    // Mock successful request_upload_url
-    fakeChannel.push.mockImplementation(() => ({
-      receive: vi.fn().mockImplementation((type, callback) => {
-        if (type === 'ok') {
-          callback({ url: uploadUrl, build_id: buildId });
-        }
-        return { receive: vi.fn().mockReturnThis() };
-      }),
-    }));
+    mockPushReceive('ok', { url: uploadUrl, build_id: buildId });
 
     // Mock failed upload
     vi.mocked(fetch).mockResolvedValue({
@@ -473,32 +376,12 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    fakeChannel.push
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ url: uploadUrl, build_id: buildId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      })
-      .mockImplementationOnce((_event) => {
-        const mockReceiveChain = {
-          receive: vi
-            .fn()
-            .mockImplementation((type: string, callback: () => void) => {
-              if (type === 'timeout') {
-                callback();
-              }
-              return mockReceiveChain;
-            }),
-        };
-        return mockReceiveChain;
-      });
+    mockPushReceive('ok', { url: uploadUrl, build_id: buildId });
+    mockPushReceive('timeout', {});
 
     await expect(() => channel.uploadBuild(testBuildPath)).rejects.toThrow();
   });
@@ -513,34 +396,12 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    fakeChannel.push
-      .mockImplementationOnce((_event) => {
-        return {
-          receive: vi.fn().mockImplementation((type, callback) => {
-            if (type === 'ok') {
-              callback({ url: uploadUrl, build_id: buildId });
-            }
-            return { receive: vi.fn().mockReturnThis() };
-          }),
-        };
-      })
-      .mockImplementationOnce((_event) => {
-        const mockReceiveChain = {
-          receive: vi
-            .fn()
-            .mockImplementation(
-              (type: string, callback: (reason: string) => void) => {
-                if (type === 'error') {
-                  callback('Mock error');
-                }
-                return mockReceiveChain;
-              },
-            ),
-        };
-        return mockReceiveChain;
-      });
+    mockPushReceive('ok', { url: uploadUrl, build_id: buildId });
+    mockPushReceive('error', { reason: 'Mock error' });
 
     await expect(() => channel.uploadBuild(testBuildPath)).rejects.toThrow();
   });
@@ -555,17 +416,11 @@ describe('Build Channel', () => {
       fakeApiKey,
     );
 
+    mockJoinReceive('ok', {});
+
     await channel.connect();
 
-    // Mock successful request_upload_url
-    fakeChannel.push.mockImplementation(() => ({
-      receive: vi.fn().mockImplementation((type, callback) => {
-        if (type === 'ok') {
-          callback({ url: uploadUrl, build_id: buildId });
-        }
-        return { receive: vi.fn().mockReturnThis() };
-      }),
-    }));
+    mockPushReceive('ok', { url: uploadUrl, build_id: buildId });
 
     // Mock network error
     vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
@@ -593,11 +448,26 @@ const fakeSocket = {
   disconnect: vi.fn((callback?: () => void) => callback?.()),
 };
 
-function mockReceive(event: string, response: object) {
+function mockJoinReceive(event: string, response: object) {
   fakeChannel.receive.mockImplementation((e, callback) => {
     if (e === event) {
       callback(response);
     }
     return fakeChannel;
+  });
+}
+
+function mockPushReceive(event: string, response: object) {
+  const mockReceiveChain = {
+    receive: vi.fn().mockImplementation((type, callback) => {
+      if (type === event) {
+        callback(response);
+      }
+      return mockReceiveChain;
+    }),
+  };
+
+  fakeChannel.push.mockImplementationOnce((_event) => {
+    return mockReceiveChain;
   });
 }
