@@ -52,3 +52,18 @@ export type TVLabsServiceInfo = {
   service_version: string;
   service_name: string;
 };
+
+export type TVLabsRequestUploadUrlResponse = {
+  url: string;
+  build_id: string;
+};
+
+export type TVLabsExtractBuildInfoResponse = {
+  application_id: string;
+};
+
+export type TVLabsBuildMetadata = {
+  filename: string;
+  type: string;
+  size: number;
+};
