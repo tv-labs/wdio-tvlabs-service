@@ -1,7 +1,8 @@
 import { SevereServiceError } from 'webdriverio';
 import * as crypto from 'crypto';
 
-import { TVLabsChannel } from './channel.js';
+import { SessionChannel } from './channels/session.js';
+import { BuildChannel } from './channels/build.js';
 import { Logger } from './logger.js';
 
 import type { Services, Capabilities, Options } from '@wdio/types';
@@ -42,21 +43,41 @@ export default class TVLabsService implements Services.ServiceInstance {
     _specs: string[],
     _cid: string,
   ) {
-    const channel = new TVLabsChannel(
-      this.endpoint(),
+    const buildPath = this.buildPath();
+
+    if (buildPath) {
+      const buildChannel = new BuildChannel(
+        this.buildEndpoint(),
+        this.reconnectRetries(),
+        this.apiKey(),
+        this.logLevel(),
+      );
+
+      await buildChannel.connect();
+
+      capabilities['tvlabs:build'] = await buildChannel.uploadBuild(
+        buildPath,
+        this.appSlug(),
+      );
+
+      await buildChannel.disconnect();
+    }
+
+    const sessionChannel = new SessionChannel(
+      this.sessionEndpoint(),
       this.reconnectRetries(),
       this.apiKey(),
       this.logLevel(),
     );
 
-    await channel.connect();
+    await sessionChannel.connect();
 
-    capabilities['tvlabs:session_id'] = await channel.newSession(
+    capabilities['tvlabs:session_id'] = await sessionChannel.newSession(
       capabilities,
       this.retries(),
     );
 
-    await channel.disconnect();
+    await sessionChannel.disconnect();
   }
 
   private setupRequestId() {
@@ -101,8 +122,20 @@ export default class TVLabsService implements Services.ServiceInstance {
     }
   }
 
-  private endpoint(): string {
-    return this._options.endpoint ?? 'wss://tvlabs.ai/appium';
+  private buildPath(): string | undefined {
+    return this._options.buildPath;
+  }
+
+  private appSlug(): string | undefined {
+    return this._options.app;
+  }
+
+  private sessionEndpoint(): string {
+    return this._options.sessionEndpoint ?? 'wss://tvlabs.ai/appium';
+  }
+
+  private buildEndpoint(): string {
+    return this._options.buildEndpoint ?? 'wss://tvlabs.ai/cli';
   }
 
   private retries(): number {

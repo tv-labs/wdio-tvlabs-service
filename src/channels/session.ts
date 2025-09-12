@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws';
 import { Socket, type Channel } from 'phoenix';
 import { SevereServiceError } from 'webdriverio';
-import { Logger } from './logger.js';
-import { getServiceInfo } from './utils.js';
+import { Logger } from '../logger.js';
+import { getServiceInfo } from '../utils.js';
 
 import type {
   TVLabsCapabilities,
@@ -10,10 +10,10 @@ import type {
   TVLabsSessionRequestEventHandler,
   TVLabsSessionRequestResponse,
   LogLevel,
-} from './types.js';
-import type { PhoenixChannelJoinResponse } from './phoenix.js';
+} from '../types.js';
+import type { PhoenixChannelJoinResponse } from '../phoenix.js';
 
-export class TVLabsChannel {
+export class SessionChannel {
   private socket: Socket;
   private lobbyTopic: Channel;
   private requestTopic?: Channel;
@@ -34,7 +34,7 @@ export class TVLabsChannel {
     private key: string,
     private logLevel: LogLevel = 'info',
   ) {
-    this.log = new Logger('@tvlabs/wdio-channel', this.logLevel);
+    this.log = new Logger('@tvlabs/session-channel', this.logLevel);
     this.socket = new Socket(this.endpoint, {
       transport: WebSocket,
       params: this.params(),
@@ -42,7 +42,7 @@ export class TVLabsChannel {
     });
 
     this.socket.onError((...args) =>
-      TVLabsChannel.logSocketError(this.log, ...args),
+      SessionChannel.logSocketError(this.log, ...args),
     );
 
     this.lobbyTopic = this.socket.channel('requests:lobby');

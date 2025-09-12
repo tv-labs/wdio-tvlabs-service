@@ -4,8 +4,11 @@ export type LogLevel = 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent';
 
 export type TVLabsServiceOptions = {
   apiKey: string;
-  endpoint?: string;
+  sessionEndpoint?: string;
+  buildEndpoint?: string;
   retries?: number;
+  buildPath?: string;
+  app?: string;
   reconnectRetries?: number;
   attachRequestId?: boolean;
 };

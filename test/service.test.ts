@@ -1,13 +1,13 @@
 import { randomInt, randomUUID } from 'crypto';
 import { SevereServiceError } from 'webdriverio';
 import TVLabsService, { type TVLabsCapabilities } from '../src/index.js';
-import { TVLabsChannel } from '../src/channel.js';
+import { SessionChannel } from '../src/channels/session.js';
 
 import type { Options } from '@wdio/types';
 
-vi.mock('../src/channel', () => {
+vi.mock('../src/channels/session', () => {
   return {
-    TVLabsChannel: vi.fn().mockImplementation(() => fakeTVLabsChannel),
+    SessionChannel: vi.fn().mockImplementation(() => fakeSessionChannel),
   };
 });
 
@@ -162,14 +162,14 @@ describe('TVLabsService', () => {
         'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122',
       };
 
-      fakeTVLabsChannel.newSession.mockResolvedValue(sessionId);
+      fakeSessionChannel.newSession.mockResolvedValue(sessionId);
 
       const service = new TVLabsService(options, capabilities, config);
 
       await service.beforeSession(config, capabilities, specs, cid);
 
-      expect(fakeTVLabsChannel.connect).toHaveBeenCalled();
-      expect(fakeTVLabsChannel.newSession).toHaveBeenCalledWith(
+      expect(fakeSessionChannel.connect).toHaveBeenCalled();
+      expect(fakeSessionChannel.newSession).toHaveBeenCalledWith(
         capabilities,
         expect.any(Number),
       );
@@ -192,13 +192,13 @@ describe('TVLabsService', () => {
 
       await service.beforeSession(config, capabilities, specs, cid);
 
-      expect(vi.mocked(TVLabsChannel)).toHaveBeenCalledWith(
+      expect(vi.mocked(SessionChannel)).toHaveBeenCalledWith(
         options.endpoint,
         options.reconnectRetries,
         options.apiKey,
         config.logLevel,
       );
-      expect(fakeTVLabsChannel.newSession).toHaveBeenCalledWith(
+      expect(fakeSessionChannel.newSession).toHaveBeenCalledWith(
         capabilities,
         options.retries,
       );
@@ -211,7 +211,7 @@ describe('TVLabsService', () => {
       const options = { apiKey: 'my-api-key' };
       const capabilities: TVLabsCapabilities = {};
 
-      fakeTVLabsChannel.newSession.mockRejectedValue(
+      fakeSessionChannel.newSession.mockRejectedValue(
         new SevereServiceError('Could not create a new session.'),
       );
 
@@ -224,7 +224,7 @@ describe('TVLabsService', () => {
   });
 });
 
-const fakeTVLabsChannel = {
+const fakeSessionChannel = {
   connect: vi.fn(),
   disconnect: vi.fn(),
   newSession: vi.fn(),

@@ -100,6 +100,18 @@ run();
 - **Required:** Yes
 - **Description:** TV Labs API key used for authentication to the platform
 
+### `buildPath`
+
+- **Type:** `string`
+- **Required:** No
+- **Description:** Path to the packaged build to use for the session. When provided, this will perform a build upload before the session is created, and sets the `tvlabs:build` capability to the newly created build ID. The build is uploaded under the organizations default App unless the `app` option is provided
+
+### `app`
+
+- **Type:** `string`
+- **Required:** No
+- **Description:** Slug of the App for build uploads. When provided in combination with `buildPath`, the build is uploaded under this specified App.
+
 ### `retries`
 
 - **Type:** `number`

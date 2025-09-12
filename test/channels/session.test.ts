@@ -1,6 +1,6 @@
 import * as phoenix from 'phoenix';
 import { randomUUID, randomInt } from 'crypto';
-import { TVLabsChannel } from '../src/channel.js';
+import { SessionChannel } from '../../src/channels/session.js';
 import { SevereServiceError } from 'webdriverio';
 
 const fakeEndpoint = 'ws://localhost:12345';
@@ -18,23 +18,23 @@ beforeEach(() => {
   mockReceive('ok', {});
 });
 
-describe('TV Labs Channel', () => {
+describe('Session Channel', () => {
   it('should be a function', () => {
-    expect(TVLabsChannel).toBeInstanceOf(Function);
+    expect(SessionChannel).toBeInstanceOf(Function);
   });
 
   it('can be instantiated', () => {
-    const channel = new TVLabsChannel(
+    const channel = new SessionChannel(
       fakeEndpoint,
       reconnectRetries,
       fakeApiKey,
     );
 
-    expect(channel).toBeInstanceOf(TVLabsChannel);
+    expect(channel).toBeInstanceOf(SessionChannel);
   });
 
   it('calls connect and join on connect', async () => {
-    const channel = new TVLabsChannel(
+    const channel = new SessionChannel(
       fakeEndpoint,
       reconnectRetries,
       fakeApiKey,
@@ -60,7 +60,7 @@ describe('TV Labs Channel', () => {
     const requestId = randomUUID();
     const sessionId = randomUUID();
 
-    const channel = new TVLabsChannel(
+    const channel = new SessionChannel(
       fakeEndpoint,
       reconnectRetries,
       fakeApiKey,
@@ -110,7 +110,7 @@ describe('TV Labs Channel', () => {
   });
 
   it('raises on failed lobby topic join', async () => {
-    const channel = new TVLabsChannel(
+    const channel = new SessionChannel(
       fakeEndpoint,
       reconnectRetries,
       fakeApiKey,
@@ -122,7 +122,7 @@ describe('TV Labs Channel', () => {
   });
 
   it('raises on topic join timeout', async () => {
-    const channel = new TVLabsChannel(
+    const channel = new SessionChannel(
       fakeEndpoint,
       reconnectRetries,
       fakeApiKey,
@@ -141,7 +141,7 @@ describe('TV Labs Channel', () => {
       'tvlabs:build': '6277d0d7-71de-4f72-9427-aaaf831e0122',
     };
 
-    const channel = new TVLabsChannel(
+    const channel = new SessionChannel(
       fakeEndpoint,
       reconnectRetries,
       fakeApiKey,
@@ -159,7 +159,7 @@ describe('TV Labs Channel', () => {
   it('retries on failure to get request id', async () => {
     const retries = randomInt(2, 10);
 
-    const channel = new TVLabsChannel(
+    const channel = new SessionChannel(
       fakeEndpoint,
       reconnectRetries,
       fakeApiKey,
@@ -189,7 +189,7 @@ describe('TV Labs Channel', () => {
     const requestId = randomUUID();
     const retries = randomInt(2, 10);
 
-    const channel = new TVLabsChannel(
+    const channel = new SessionChannel(
       fakeEndpoint,
       reconnectRetries,
       fakeApiKey,
@@ -226,7 +226,7 @@ describe('TV Labs Channel', () => {
     const sessionId = randomUUID();
     const retries = randomInt(2, 10);
 
-    const channel = new TVLabsChannel(
+    const channel = new SessionChannel(
       fakeEndpoint,
       reconnectRetries,
       fakeApiKey,
@@ -274,7 +274,7 @@ describe('TV Labs Channel', () => {
     const requestId = randomUUID();
     const retries = randomInt(2, 10);
 
-    const channel = new TVLabsChannel(
+    const channel = new SessionChannel(
       fakeEndpoint,
       reconnectRetries,
       fakeApiKey,
