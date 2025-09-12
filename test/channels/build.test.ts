@@ -19,15 +19,20 @@ vi.mock('phoenix', () => {
 });
 
 vi.mock('node:fs', () => ({
-  readFileSync: vi.fn(),
   statSync: vi.fn(),
+  createReadStream: vi.fn(),
 }));
 
 beforeEach(() => {
   vi.clearAllMocks();
 
   vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as fs.Stats);
-  vi.mocked(fs.readFileSync).mockReturnValue(Buffer.from('fake-file-content'));
+
+  vi.mocked(fs.createReadStream).mockReturnValue({
+    pipe: vi.fn(),
+    on: vi.fn(),
+    read: vi.fn(),
+  } as unknown as fs.ReadStream);
 
   vi.mocked(fetch).mockResolvedValue({
     ok: true,
@@ -118,7 +123,8 @@ describe('Build Channel', () => {
         'Content-Type': 'application/vnd.android.package-archive',
         'Content-Length': '1024',
       },
-      body: expect.any(Buffer),
+      body: expect.any(Object),
+      duplex: 'half',
     });
 
     expect(fakeChannel.push).toHaveBeenCalledWith('extract_build_info', {});
@@ -167,7 +173,8 @@ describe('Build Channel', () => {
         'Content-Type': 'application/vnd.android.package-archive',
         'Content-Length': '1024',
       },
-      body: expect.any(Buffer),
+      body: expect.any(Object),
+      duplex: 'half',
     });
 
     expect(fakeChannel.push).toHaveBeenCalledWith('extract_build_info', {});

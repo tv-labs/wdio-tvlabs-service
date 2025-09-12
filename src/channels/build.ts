@@ -103,8 +103,9 @@ export class BuildChannel extends BaseChannel {
           'Content-Type': metadata.type,
           'Content-Length': String(metadata.size),
         },
-        // Can we use a stream here?
-        body: fs.readFileSync(filePath),
+        // @ts-expect-error - FIXME: fetch types are incorrect
+        body: fs.createReadStream(filePath),
+        duplex: 'half',
       });
 
       if (!response.ok) {
