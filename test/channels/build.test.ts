@@ -126,9 +126,6 @@ describe('Build Channel', () => {
       }),
     );
 
-    // Verify extract_build_info was called
-    expect(fakeChannel.push).toHaveBeenCalledWith('extract_build_info', {});
-
     // Verify file was uploaded to the URL
     expect(fetch).toHaveBeenCalledWith(uploadUrl, {
       method: 'PUT',
@@ -138,6 +135,9 @@ describe('Build Channel', () => {
       },
       body: expect.any(Buffer),
     });
+
+    // Verify extract_build_info was called
+    expect(fakeChannel.push).toHaveBeenCalledWith('extract_build_info', {});
   });
 
   it('can upload a build without app slug', async () => {
@@ -190,9 +190,22 @@ describe('Build Channel', () => {
         application_slug: undefined,
       }),
     );
+
+    // Verify file was uploaded to the URL
+    expect(fetch).toHaveBeenCalledWith(uploadUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/vnd.android.package-archive',
+        'Content-Length': '1024',
+      },
+      body: expect.any(Buffer),
+    });
+
+    // Verify extract_build_info was called
+    expect(fakeChannel.push).toHaveBeenCalledWith('extract_build_info', {});
   });
 
-  it('detects correct MIME types for different file extensions', async () => {
+  it('detects correct MIME type for zip files', async () => {
     const buildId = randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';
     const applicationId = 'com.example.app';
@@ -205,53 +218,135 @@ describe('Build Channel', () => {
 
     await channel.connect();
 
-    // Mock successful responses for both calls
-    fakeChannel.push.mockImplementation(() => ({
-      receive: vi.fn().mockImplementation((type, callback) => {
-        if (type === 'ok') {
-          callback({
-            url: uploadUrl,
-            build_id: buildId,
-            application_id: applicationId,
-          });
-        }
-        return { receive: vi.fn().mockReturnThis() };
-      }),
-    }));
+    fakeChannel.push
+      .mockImplementationOnce((_event) => {
+        return {
+          receive: vi.fn().mockImplementation((type, callback) => {
+            if (type === 'ok') {
+              callback({ url: uploadUrl, build_id: buildId });
+            }
+            return { receive: vi.fn().mockReturnThis() };
+          }),
+        };
+      })
+      .mockImplementationOnce((_event) => {
+        return {
+          receive: vi.fn().mockImplementation((type, callback) => {
+            if (type === 'ok') {
+              callback({ application_id: applicationId });
+            }
+            return { receive: vi.fn().mockReturnThis() };
+          }),
+        };
+      });
 
-    // Test .zip file
     await channel.uploadBuild('/path/to/test.zip');
+
     expect(fakeChannel.push).toHaveBeenCalledWith(
       'request_upload_url',
       expect.objectContaining({
         metadata: expect.objectContaining({
+          filename: 'test.zip',
           type: 'application/zip',
+          size: 1024,
         }),
       }),
     );
+  });
 
-    // Reset and test unknown extension
-    vi.clearAllMocks();
-    mockReceive('ok', {});
-    fakeChannel.push.mockImplementation(() => ({
-      receive: vi.fn().mockImplementation((type, callback) => {
-        if (type === 'ok') {
-          callback({
-            url: uploadUrl,
-            build_id: buildId,
-            application_id: applicationId,
-          });
-        }
-        return { receive: vi.fn().mockReturnThis() };
-      }),
-    }));
+  it('detects correct MIME type for apk files', async () => {
+    const buildId = randomUUID();
+    const uploadUrl = 'https://storage.example.com/upload';
+    const applicationId = 'com.example.app';
 
-    await channel.uploadBuild('/path/to/test.unknown');
+    const channel = new BuildChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
+
+    await channel.connect();
+
+    fakeChannel.push
+      .mockImplementationOnce((_event) => {
+        return {
+          receive: vi.fn().mockImplementation((type, callback) => {
+            if (type === 'ok') {
+              callback({ url: uploadUrl, build_id: buildId });
+            }
+            return { receive: vi.fn().mockReturnThis() };
+          }),
+        };
+      })
+      .mockImplementationOnce((_event) => {
+        return {
+          receive: vi.fn().mockImplementation((type, callback) => {
+            if (type === 'ok') {
+              callback({ application_id: applicationId });
+            }
+            return { receive: vi.fn().mockReturnThis() };
+          }),
+        };
+      });
+
+    await channel.uploadBuild('/path/to/test.apk');
+
     expect(fakeChannel.push).toHaveBeenCalledWith(
       'request_upload_url',
       expect.objectContaining({
         metadata: expect.objectContaining({
+          filename: 'test.apk',
+          type: 'application/vnd.android.package-archive',
+          size: 1024,
+        }),
+      }),
+    );
+  });
+
+  it('detects correct MIME type for other file types', async () => {
+    const buildId = randomUUID();
+    const uploadUrl = 'https://storage.example.com/upload';
+    const applicationId = 'com.example.app';
+
+    const channel = new BuildChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
+
+    await channel.connect();
+
+    fakeChannel.push
+      .mockImplementationOnce((_event) => {
+        return {
+          receive: vi.fn().mockImplementation((type, callback) => {
+            if (type === 'ok') {
+              callback({ url: uploadUrl, build_id: buildId });
+            }
+            return { receive: vi.fn().mockReturnThis() };
+          }),
+        };
+      })
+      .mockImplementationOnce((_event) => {
+        return {
+          receive: vi.fn().mockImplementation((type, callback) => {
+            if (type === 'ok') {
+              callback({ application_id: applicationId });
+            }
+            return { receive: vi.fn().mockReturnThis() };
+          }),
+        };
+      });
+
+    await channel.uploadBuild('/path/to/test.unknown');
+
+    expect(fakeChannel.push).toHaveBeenCalledWith(
+      'request_upload_url',
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          filename: 'test.unknown',
           type: 'application/octet-stream',
+          size: 1024,
         }),
       }),
     );
