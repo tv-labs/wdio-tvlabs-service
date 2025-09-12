@@ -100,7 +100,6 @@ describe('Build Channel', () => {
 
     expect(result).toEqual(buildId);
 
-    // Verify request_upload_url was called with correct metadata
     expect(fakeChannel.push).toHaveBeenCalledWith(
       'request_upload_url',
       expect.objectContaining({
@@ -113,7 +112,6 @@ describe('Build Channel', () => {
       }),
     );
 
-    // Verify file was uploaded to the URL
     expect(fetch).toHaveBeenCalledWith(uploadUrl, {
       method: 'PUT',
       headers: {
@@ -123,7 +121,6 @@ describe('Build Channel', () => {
       body: expect.any(Buffer),
     });
 
-    // Verify extract_build_info was called
     expect(fakeChannel.push).toHaveBeenCalledWith('extract_build_info', {});
   });
 
@@ -164,7 +161,6 @@ describe('Build Channel', () => {
       }),
     );
 
-    // Verify file was uploaded to the URL
     expect(fetch).toHaveBeenCalledWith(uploadUrl, {
       method: 'PUT',
       headers: {
@@ -174,7 +170,6 @@ describe('Build Channel', () => {
       body: expect.any(Buffer),
     });
 
-    // Verify extract_build_info was called
     expect(fakeChannel.push).toHaveBeenCalledWith('extract_build_info', {});
   });
 
@@ -422,7 +417,6 @@ describe('Build Channel', () => {
 
     mockPushReceive('ok', { url: uploadUrl, build_id: buildId });
 
-    // Mock network error
     vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
 
     await expect(() => channel.uploadBuild(testBuildPath)).rejects.toThrow();
