@@ -87,39 +87,27 @@ describe('Build Channel', () => {
 
     await channel.connect();
 
-    // Mock push responses in order
-    let pushCallCount = 0;
-    fakeChannel.push.mockImplementation((event) => {
-      pushCallCount++;
-
-      if (event === 'request_upload_url' && pushCallCount === 1) {
+    fakeChannel.push
+      .mockImplementationOnce((_event) => {
         return {
           receive: vi.fn().mockImplementation((type, callback) => {
             if (type === 'ok') {
-              // Immediately call the callback
               callback({ url: uploadUrl, build_id: buildId });
             }
             return { receive: vi.fn().mockReturnThis() };
           }),
         };
-      }
-
-      if (event === 'extract_build_info' && pushCallCount === 2) {
+      })
+      .mockImplementationOnce((_event) => {
         return {
           receive: vi.fn().mockImplementation((type, callback) => {
             if (type === 'ok') {
-              // Immediately call the callback
               callback({ application_id: applicationId });
             }
             return { receive: vi.fn().mockReturnThis() };
           }),
         };
-      }
-
-      return {
-        receive: vi.fn().mockReturnThis(),
-      };
-    });
+      });
 
     const result = await channel.uploadBuild(testBuildPath, testAppSlug);
 
@@ -165,12 +153,8 @@ describe('Build Channel', () => {
 
     await channel.connect();
 
-    // Mock push responses
-    let pushCallCount = 0;
-    fakeChannel.push.mockImplementation((event) => {
-      pushCallCount++;
-
-      if (event === 'request_upload_url' && pushCallCount === 1) {
+    fakeChannel.push
+      .mockImplementationOnce((_event) => {
         return {
           receive: vi.fn().mockImplementation((type, callback) => {
             if (type === 'ok') {
@@ -179,9 +163,8 @@ describe('Build Channel', () => {
             return { receive: vi.fn().mockReturnThis() };
           }),
         };
-      }
-
-      if (event === 'extract_build_info' && pushCallCount === 2) {
+      })
+      .mockImplementationOnce((_event) => {
         return {
           receive: vi.fn().mockImplementation((type, callback) => {
             if (type === 'ok') {
@@ -190,12 +173,7 @@ describe('Build Channel', () => {
             return { receive: vi.fn().mockReturnThis() };
           }),
         };
-      }
-
-      return {
-        receive: vi.fn().mockReturnThis(),
-      };
-    });
+      });
 
     const result = await channel.uploadBuild(testBuildPath);
 
@@ -402,12 +380,8 @@ describe('Build Channel', () => {
 
     await channel.connect();
 
-    // Mock responses: successful upload URL, then timeout on extract
-    let pushCallCount = 0;
-    fakeChannel.push.mockImplementation((event) => {
-      pushCallCount++;
-
-      if (event === 'request_upload_url' && pushCallCount === 1) {
+    fakeChannel.push
+      .mockImplementationOnce((_event) => {
         return {
           receive: vi.fn().mockImplementation((type, callback) => {
             if (type === 'ok') {
@@ -416,9 +390,8 @@ describe('Build Channel', () => {
             return { receive: vi.fn().mockReturnThis() };
           }),
         };
-      }
-
-      if (event === 'extract_build_info' && pushCallCount === 2) {
+      })
+      .mockImplementationOnce((_event) => {
         const mockReceiveChain = {
           receive: vi
             .fn()
@@ -430,12 +403,7 @@ describe('Build Channel', () => {
             }),
         };
         return mockReceiveChain;
-      }
-
-      return {
-        receive: vi.fn().mockReturnThis(),
-      };
-    });
+      });
 
     await expect(() => channel.uploadBuild(testBuildPath)).rejects.toThrow();
   });
@@ -452,12 +420,8 @@ describe('Build Channel', () => {
 
     await channel.connect();
 
-    // Mock responses: successful upload URL, then error on extract
-    let pushCallCount = 0;
-    fakeChannel.push.mockImplementation((event) => {
-      pushCallCount++;
-
-      if (event === 'request_upload_url' && pushCallCount === 1) {
+    fakeChannel.push
+      .mockImplementationOnce((_event) => {
         return {
           receive: vi.fn().mockImplementation((type, callback) => {
             if (type === 'ok') {
@@ -466,9 +430,8 @@ describe('Build Channel', () => {
             return { receive: vi.fn().mockReturnThis() };
           }),
         };
-      }
-
-      if (event === 'extract_build_info' && pushCallCount === 2) {
+      })
+      .mockImplementationOnce((_event) => {
         const mockReceiveChain = {
           receive: vi
             .fn()
@@ -482,12 +445,7 @@ describe('Build Channel', () => {
             ),
         };
         return mockReceiveChain;
-      }
-
-      return {
-        receive: vi.fn().mockReturnThis(),
-      };
-    });
+      });
 
     await expect(() => channel.uploadBuild(testBuildPath)).rejects.toThrow();
   });
