@@ -81,7 +81,7 @@ export class BuildChannel {
 
     const { application_id } = await this.extractBuildInfo();
 
-    this.log.info(`Build ${application_id} processed successfully`);
+    this.log.info(`Build "${application_id}" processed successfully`);
 
     return build_id;
   }
@@ -91,14 +91,14 @@ export class BuildChannel {
     appSlug: string | undefined,
   ) {
     try {
-      return this.push<TVLabsRequestUploadUrlResponse>(
+      return await this.push<TVLabsRequestUploadUrlResponse>(
         this.lobbyTopic,
         'request_upload_url',
         { metadata, application_slug: appSlug },
       );
     } catch (error) {
-      this.log.error('Failed to request upload URL:', error);
-      throw new SevereServiceError('Could not request upload URL');
+      this.log.error('Error requesting upload URL:', error);
+      throw error;
     }
   }
 
@@ -107,37 +107,42 @@ export class BuildChannel {
     filePath: string,
     metadata: TVLabsBuildMetadata,
   ): Promise<void> {
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': metadata.type,
-        'Content-Length': String(metadata.size),
-      },
-      // Can we use a stream here?
-      body: fs.readFileSync(filePath),
-    });
+    try {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': metadata.type,
+          'Content-Length': String(metadata.size),
+        },
+        // Can we use a stream here?
+        body: fs.readFileSync(filePath),
+      });
 
-    if (!response.ok) {
-      throw new SevereServiceError(
-        `Failed to upload build to storage, got ${response.status}`,
-      );
+      if (!response.ok) {
+        throw new SevereServiceError(
+          `Failed to upload build to storage, got ${response.status}`,
+        );
+      }
+
+      this.log.info('Upload complete');
+    } catch (error) {
+      this.log.error('Error uploading build:', error);
+      throw error;
     }
-
-    this.log.info('Upload complete');
   }
 
   private async extractBuildInfo() {
-    this.log.info('Notifying TV Labs to process uploaded build...');
+    this.log.info('Processing uploaded build...');
 
     try {
-      return this.push<TVLabsExtractBuildInfoResponse>(
+      return await this.push<TVLabsExtractBuildInfoResponse>(
         this.lobbyTopic,
         'extract_build_info',
         {},
       );
     } catch (error) {
-      this.log.error('Build processing failed:', error);
-      throw new SevereServiceError('Build processing failed');
+      this.log.error('Error processing build:', error);
+      throw error;
     }
   }
 
