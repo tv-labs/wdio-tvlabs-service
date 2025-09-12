@@ -2,6 +2,7 @@ import { randomInt, randomUUID } from 'crypto';
 import { SevereServiceError } from 'webdriverio';
 import TVLabsService, { type TVLabsCapabilities } from '../src/index.js';
 import { SessionChannel } from '../src/channels/session.js';
+import { BuildChannel } from '../src/channels/build.js';
 
 import type { Options } from '@wdio/types';
 
@@ -11,7 +12,17 @@ vi.mock('../src/channels/session', () => {
   };
 });
 
+vi.mock('../src/channels/build', () => {
+  return {
+    BuildChannel: vi.fn().mockImplementation(() => fakeBuildChannel),
+  };
+});
+
 describe('TVLabsService', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('should be a function', () => {
     expect(TVLabsService).toBeInstanceOf(Function);
   });
@@ -185,7 +196,7 @@ describe('TVLabsService', () => {
         apiKey: randomUUID(),
         retries: randomInt(1, 10),
         reconnectRetries: randomInt(1, 10),
-        endpoint: randomUUID(),
+        sessionEndpoint: randomUUID(),
       };
 
       const service = new TVLabsService(options, capabilities, config);
@@ -193,7 +204,7 @@ describe('TVLabsService', () => {
       await service.beforeSession(config, capabilities, specs, cid);
 
       expect(vi.mocked(SessionChannel)).toHaveBeenCalledWith(
-        options.endpoint,
+        options.sessionEndpoint,
         options.reconnectRetries,
         options.apiKey,
         config.logLevel,
@@ -221,6 +232,134 @@ describe('TVLabsService', () => {
         service.beforeSession(config, capabilities, specs, cid),
       ).rejects.toThrow('Could not create a new session.');
     });
+
+    it('creates build channel and uploads build when buildPath is provided', async () => {
+      const config = {};
+      const specs: string[] = [];
+      const cid = '';
+      const buildId = randomUUID();
+      const sessionId = randomUUID();
+      const buildPath = '/path/to/app.apk';
+      const options = {
+        apiKey: 'my-api-key',
+        buildPath,
+        buildEndpoint: 'wss://build.example.com',
+        reconnectRetries: 3,
+      };
+      const capabilities: TVLabsCapabilities = {};
+
+      fakeBuildChannel.uploadBuild.mockResolvedValue(buildId);
+      fakeSessionChannel.newSession.mockResolvedValue(sessionId);
+
+      const service = new TVLabsService(options, capabilities, config);
+
+      await service.beforeSession(config, capabilities, specs, cid);
+
+      expect(vi.mocked(BuildChannel)).toHaveBeenCalledWith(
+        options.buildEndpoint,
+        options.reconnectRetries,
+        options.apiKey,
+        'info',
+      );
+
+      expect(fakeBuildChannel.connect).toHaveBeenCalled();
+      expect(fakeBuildChannel.uploadBuild).toHaveBeenCalledWith(
+        buildPath,
+        undefined, // no app slug provided
+      );
+      expect(fakeBuildChannel.disconnect).toHaveBeenCalled();
+
+      expect(capabilities['tvlabs:session_id']).toEqual(sessionId);
+      expect(capabilities['tvlabs:build']).toEqual(buildId);
+    });
+
+    it('passes app slug to uploadBuild when app is provided', async () => {
+      const config = {};
+      const specs: string[] = [];
+      const cid = '';
+      const buildId = randomUUID();
+      const sessionId = randomUUID();
+      const buildPath = '/path/to/app.apk';
+      const appSlug = 'my-awesome-app';
+      const options = {
+        apiKey: 'my-api-key',
+        buildPath,
+        app: appSlug,
+      };
+      const capabilities: TVLabsCapabilities = {};
+
+      fakeBuildChannel.uploadBuild.mockResolvedValue(buildId);
+      fakeSessionChannel.newSession.mockResolvedValue(sessionId);
+
+      const service = new TVLabsService(options, capabilities, config);
+
+      await service.beforeSession(config, capabilities, specs, cid);
+
+      expect(fakeBuildChannel.uploadBuild).toHaveBeenCalledWith(
+        buildPath,
+        appSlug,
+      );
+
+      expect(capabilities['tvlabs:session_id']).toEqual(sessionId);
+      expect(capabilities['tvlabs:build']).toEqual(buildId);
+    });
+
+    it('aborts operation and raises error when build upload fails', async () => {
+      const config = {};
+      const specs: string[] = [];
+      const cid = '';
+      const buildPath = '/path/to/app.apk';
+      const options = {
+        apiKey: 'my-api-key',
+        buildPath,
+      };
+      const capabilities: TVLabsCapabilities = {};
+
+      fakeBuildChannel.uploadBuild.mockRejectedValue(
+        new SevereServiceError('Failed to upload build'),
+      );
+
+      const service = new TVLabsService(options, capabilities, config);
+
+      await expect(
+        service.beforeSession(config, capabilities, specs, cid),
+      ).rejects.toThrow('Failed to upload build');
+
+      expect(fakeBuildChannel.connect).toHaveBeenCalled();
+      expect(fakeBuildChannel.uploadBuild).toHaveBeenCalled();
+
+      expect(vi.mocked(SessionChannel)).not.toHaveBeenCalled();
+      expect(fakeSessionChannel.connect).not.toHaveBeenCalled();
+      expect(fakeSessionChannel.newSession).not.toHaveBeenCalled();
+
+      expect(capabilities['tvlabs:session_id']).toBeUndefined();
+      expect(capabilities['tvlabs:build']).toBeUndefined();
+    });
+
+    it('does not create build channel when buildPath is not provided', async () => {
+      const config = {};
+      const specs: string[] = [];
+      const cid = '';
+      const sessionId = randomUUID();
+      const options = {
+        apiKey: 'my-api-key',
+        // No buildPath provided
+      };
+      const capabilities: TVLabsCapabilities = {};
+
+      fakeSessionChannel.newSession.mockResolvedValue(sessionId);
+
+      const service = new TVLabsService(options, capabilities, config);
+
+      await service.beforeSession(config, capabilities, specs, cid);
+
+      expect(vi.mocked(BuildChannel)).not.toHaveBeenCalled();
+      expect(fakeBuildChannel.connect).not.toHaveBeenCalled();
+      expect(fakeBuildChannel.uploadBuild).not.toHaveBeenCalled();
+
+      expect(capabilities['tvlabs:session_id']).toEqual(sessionId);
+      expect(capabilities['tvlabs:build']).toBeUndefined();
+    });
   });
 });
 
@@ -228,4 +367,10 @@ const fakeSessionChannel = {
   connect: vi.fn(),
   disconnect: vi.fn(),
   newSession: vi.fn(),
+};
+
+const fakeBuildChannel = {
+  connect: vi.fn(),
+  disconnect: vi.fn(),
+  uploadBuild: vi.fn(),
 };
