@@ -51,17 +51,17 @@ export class BuildChannel {
 
   async connect(): Promise<void> {
     try {
-      this.log.debug('Connecting to TV Labs...');
+      this.log.debug('Connecting to build channel...');
 
       this.socket.connect();
 
       await this.join(this.lobbyTopic);
 
-      this.log.debug('Connected to TV Labs!');
+      this.log.debug('Connected to build channel!');
     } catch (error) {
-      this.log.error('Error connecting to TV Labs:', error);
+      this.log.error('Error connecting to build channel:', error);
       throw new SevereServiceError(
-        'Could not connect to TV Labs, please check your connection.',
+        'Could not connect to build channel, please check your connection.',
       );
     }
   }
@@ -75,9 +75,13 @@ export class BuildChannel {
 
     const { url, build_id } = await this.requestUploadUrl(metadata, appSlug);
 
+    this.log.info('Uploading build...');
+
     await this.uploadToUrl(url, buildPath, metadata);
 
-    await this.extractBuildInfo();
+    const { application_id } = await this.extractBuildInfo();
+
+    this.log.info(`Build ${application_id} processed successfully`);
 
     return build_id;
   }
@@ -103,40 +107,34 @@ export class BuildChannel {
     filePath: string,
     metadata: TVLabsBuildMetadata,
   ): Promise<void> {
-    this.log.info('Uploading build...');
-
-    const contents = fs.readFileSync(filePath);
-
     const response = await fetch(url, {
       method: 'PUT',
       headers: {
         'Content-Type': metadata.type,
         'Content-Length': String(metadata.size),
       },
-      body: contents,
+      // Can we use a stream here?
+      body: fs.readFileSync(filePath),
     });
 
-    if (!response.ok && !(response.status >= 200 && response.status < 300)) {
-      const body = await response.text().catch(() => '');
-      this.log.error('Upload failed', response.status, body);
-      throw new SevereServiceError('Failed to upload build to storage');
+    if (!response.ok) {
+      throw new SevereServiceError(
+        `Failed to upload build to storage, got ${response.status}`,
+      );
     }
 
     this.log.info('Upload complete');
   }
 
-  private async extractBuildInfo(): Promise<void> {
+  private async extractBuildInfo() {
     this.log.info('Notifying TV Labs to process uploaded build...');
 
     try {
-      const { application_id } =
-        await this.push<TVLabsExtractBuildInfoResponse>(
-          this.lobbyTopic,
-          'extract_build_info',
-          {},
-        );
-
-      this.log.info(`Build ${application_id} processed successfully`);
+      return this.push<TVLabsExtractBuildInfoResponse>(
+        this.lobbyTopic,
+        'extract_build_info',
+        {},
+      );
     } catch (error) {
       this.log.error('Build processing failed:', error);
       throw new SevereServiceError('Build processing failed');

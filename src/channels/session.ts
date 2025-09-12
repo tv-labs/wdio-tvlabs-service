@@ -58,17 +58,17 @@ export class SessionChannel {
 
   async connect(): Promise<void> {
     try {
-      this.log.debug('Connecting to TV Labs...');
+      this.log.debug('Connecting to session channel...');
 
       this.socket.connect();
 
       await this.join(this.lobbyTopic);
 
-      this.log.debug('Connected to TV Labs!');
+      this.log.debug('Connected to session channel!');
     } catch (error) {
-      this.log.error('Error connecting to TV Labs:', error);
+      this.log.error('Error connecting to session channel:', error);
       throw new SevereServiceError(
-        'Could not connect to TV Labs, please check your connection.',
+        'Could not connect to session channel, please check your connection.',
       );
     }
   }
