@@ -66,4 +66,5 @@ export type TVLabsBuildMetadata = {
   filename: string;
   type: string;
   size: number;
+  sha256: string;
 };

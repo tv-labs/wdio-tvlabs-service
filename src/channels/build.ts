@@ -2,6 +2,7 @@ import { type Channel } from 'phoenix';
 import { SevereServiceError } from 'webdriverio';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as crypto from 'node:crypto';
 
 import { BaseChannel } from './base.js';
 
@@ -56,7 +57,7 @@ export class BuildChannel extends BaseChannel {
   }
 
   async uploadBuild(buildPath: string, appSlug?: string): Promise<string> {
-    const metadata = this.getFileMetadata(buildPath);
+    const metadata = await this.getFileMetadata(buildPath);
 
     this.log.info(
       `Requesting upload for build ${metadata.filename} (${metadata.type}, ${metadata.size} bytes)`,
@@ -136,16 +137,32 @@ export class BuildChannel extends BaseChannel {
     }
   }
 
-  private getFileMetadata(buildPath: string): TVLabsBuildMetadata {
+  private async getFileMetadata(
+    buildPath: string,
+  ): Promise<TVLabsBuildMetadata> {
     const filename = path.basename(buildPath);
     const size = fs.statSync(buildPath).size;
     const type = this.detectMimeType(filename);
-    return { filename, type, size };
+    const sha256 = await this.computeSha256(buildPath);
+
+    return { filename, type, size, sha256 };
+  }
+
+  private async computeSha256(buildPath: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const hash = crypto.createHash('sha256');
+      const stream = fs.createReadStream(buildPath);
+
+      stream.on('data', (chunk) => hash.update(chunk));
+      stream.on('end', () => resolve(hash.digest('hex')));
+      stream.on('error', (err) => reject(err));
+    });
   }
 
   private detectMimeType(filename: string): string {
-    const ext = path.extname(filename).toLowerCase();
-    switch (ext) {
+    const fileExtension = path.extname(filename).toLowerCase();
+
+    switch (fileExtension) {
       case '.apk':
         return 'application/vnd.android.package-archive';
       case '.zip':

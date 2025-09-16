@@ -1,6 +1,6 @@
 import * as phoenix from 'phoenix';
 import * as fs from 'node:fs';
-import { randomUUID } from 'crypto';
+import * as crypto from 'node:crypto';
 import { BuildChannel } from '../../src/channels/build.js';
 import { SevereServiceError } from 'webdriverio';
 
@@ -9,6 +9,12 @@ const fakeApiKey = 'my-api-key';
 const reconnectRetries = 5;
 const testBuildPath = '/path/to/test.apk';
 const testAppSlug = 'test-app';
+
+const mockFileData = crypto.randomBytes(1024);
+const mockFileHash = crypto
+  .createHash('sha256')
+  .update(mockFileData)
+  .digest('hex');
 
 vi.stubGlobal('fetch', vi.fn());
 
@@ -20,24 +26,24 @@ vi.mock('phoenix', () => {
 
 vi.mock('node:fs', () => ({
   statSync: vi.fn(),
-  createReadStream: vi.fn(),
+  createReadStream: vi.fn().mockImplementation(() => ({
+    pipe: vi.fn(),
+    on: vi.fn().mockImplementation((event, callback) => {
+      callback(event === 'data' ? Buffer.from(mockFileData) : undefined);
+    }),
+    read: vi.fn(),
+  })),
 }));
+
+vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as fs.Stats);
+
+vi.mocked(fetch).mockResolvedValue({
+  ok: true,
+  status: 200,
+} as Response);
 
 beforeEach(() => {
   vi.clearAllMocks();
-
-  vi.mocked(fs.statSync).mockReturnValue({ size: 1024 } as fs.Stats);
-
-  vi.mocked(fs.createReadStream).mockReturnValue({
-    pipe: vi.fn(),
-    on: vi.fn(),
-    read: vi.fn(),
-  } as unknown as fs.ReadStream);
-
-  vi.mocked(fetch).mockResolvedValue({
-    ok: true,
-    status: 200,
-  } as Response);
 });
 
 describe('Build Channel', () => {
@@ -81,7 +87,7 @@ describe('Build Channel', () => {
   });
 
   it('can upload a build successfully', async () => {
-    const buildId = randomUUID();
+    const buildId = crypto.randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';
     const applicationId = 'com.example.app';
 
@@ -112,6 +118,7 @@ describe('Build Channel', () => {
           filename: 'test.apk',
           type: 'application/vnd.android.package-archive',
           size: 1024,
+          sha256: mockFileHash,
         },
         application_slug: testAppSlug,
       }),
@@ -131,7 +138,7 @@ describe('Build Channel', () => {
   });
 
   it('can upload a build without app slug', async () => {
-    const buildId = randomUUID();
+    const buildId = crypto.randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';
     const applicationId = 'com.example.app';
 
@@ -162,6 +169,7 @@ describe('Build Channel', () => {
           filename: 'test.apk',
           type: 'application/vnd.android.package-archive',
           size: 1024,
+          sha256: mockFileHash,
         },
         application_slug: undefined,
       }),
@@ -181,7 +189,7 @@ describe('Build Channel', () => {
   });
 
   it('detects correct MIME type for zip files', async () => {
-    const buildId = randomUUID();
+    const buildId = crypto.randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';
     const applicationId = 'com.example.app';
 
@@ -210,13 +218,14 @@ describe('Build Channel', () => {
           filename: 'test.zip',
           type: 'application/zip',
           size: 1024,
+          sha256: mockFileHash,
         }),
       }),
     );
   });
 
   it('detects correct MIME type for apk files', async () => {
-    const buildId = randomUUID();
+    const buildId = crypto.randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';
     const applicationId = 'com.example.app';
 
@@ -245,13 +254,14 @@ describe('Build Channel', () => {
           filename: 'test.apk',
           type: 'application/vnd.android.package-archive',
           size: 1024,
+          sha256: mockFileHash,
         }),
       }),
     );
   });
 
   it('detects correct MIME type for other file types', async () => {
-    const buildId = randomUUID();
+    const buildId = crypto.randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';
     const applicationId = 'com.example.app';
 
@@ -280,6 +290,7 @@ describe('Build Channel', () => {
           filename: 'test.unknown',
           type: 'application/octet-stream',
           size: 1024,
+          sha256: mockFileHash,
         }),
       }),
     );
@@ -342,7 +353,7 @@ describe('Build Channel', () => {
   });
 
   it('raises on failed file upload to storage', async () => {
-    const buildId = randomUUID();
+    const buildId = crypto.randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';
 
     const channel = new BuildChannel(
@@ -369,7 +380,7 @@ describe('Build Channel', () => {
   });
 
   it('raises on extract build info timeout', async () => {
-    const buildId = randomUUID();
+    const buildId = crypto.randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';
 
     const channel = new BuildChannel(
@@ -389,7 +400,7 @@ describe('Build Channel', () => {
   });
 
   it('raises on extract build info error', async () => {
-    const buildId = randomUUID();
+    const buildId = crypto.randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';
 
     const channel = new BuildChannel(
@@ -409,7 +420,7 @@ describe('Build Channel', () => {
   });
 
   it('raises on fetch network error', async () => {
-    const buildId = randomUUID();
+    const buildId = crypto.randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';
 
     const channel = new BuildChannel(
