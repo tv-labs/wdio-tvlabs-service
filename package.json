@@ -1,6 +1,6 @@
 {
   "name": "@tvlabs/wdio-service",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "WebdriverIO service that provides a better integration into TV Labs",
   "author": "Regan Karlewicz <regan@tvlabs.ai>",
   "license": "Apache-2.0",
@@ -29,7 +29,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint",
-    "test": "vitest --config vitest.config.ts --coverage",
+    "test": "vitest --config vitest.config.ts --coverage --run",
+    "test:watch": "vitest --config vitest.config.ts --coverage",
     "publish:dry": "npm publish --access public --provenance --dry-run"
   },
   "type": "module",
