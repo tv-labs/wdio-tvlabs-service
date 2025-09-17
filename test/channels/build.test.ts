@@ -188,6 +188,50 @@ describe('Build Channel', () => {
     expect(fakeChannel.push).toHaveBeenCalledWith('extract_build_info', {});
   });
 
+  it('skips upload when existing build is returned from lobby', async () => {
+    const buildId = crypto.randomUUID();
+    const applicationId = 'com.example.app';
+
+    const channel = new BuildChannel(
+      fakeEndpoint,
+      reconnectRetries,
+      fakeApiKey,
+    );
+
+    mockJoinReceive('ok', {});
+
+    await channel.connect();
+
+    // Request upload URL response with existing=true
+    mockPushReceive('ok', {
+      url: null,
+      build_id: buildId,
+      existing: true,
+      application_id: applicationId,
+    });
+
+    const result = await channel.uploadBuild(testBuildPath, testAppSlug);
+
+    expect(result).toEqual(buildId);
+
+    expect(fakeChannel.push).toHaveBeenCalledWith(
+      'request_upload_url',
+      expect.objectContaining({
+        metadata: {
+          filename: 'test.apk',
+          type: 'application/vnd.android.package-archive',
+          size: 1024,
+          sha256: mockFileHash,
+        },
+        application_slug: testAppSlug,
+      }),
+    );
+
+    // Ensure no upload (fetch) and no extract call happened
+    expect(fetch).not.toHaveBeenCalled();
+    expect(fakeChannel.push).not.toHaveBeenCalledWith('extract_build_info', {});
+  });
+
   it('detects correct MIME type for zip files', async () => {
     const buildId = crypto.randomUUID();
     const uploadUrl = 'https://storage.example.com/upload';

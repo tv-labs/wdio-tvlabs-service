@@ -56,6 +56,8 @@ export type TVLabsServiceInfo = {
 export type TVLabsRequestUploadUrlResponse = {
   url: string;
   build_id: string;
+  existing: boolean;
+  application_id?: string;
 };
 
 export type TVLabsExtractBuildInfoResponse = {
