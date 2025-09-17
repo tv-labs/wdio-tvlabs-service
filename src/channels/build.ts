@@ -63,15 +63,22 @@ export class BuildChannel extends BaseChannel {
       `Requesting upload for build ${metadata.filename} (${metadata.type}, ${metadata.size} bytes)`,
     );
 
-    const { url, build_id } = await this.requestUploadUrl(metadata, appSlug);
+    const { existing, build_id, url } = await this.requestUploadUrl(
+      metadata,
+      appSlug,
+    );
 
-    this.log.info('Uploading build...');
+    if (existing) {
+      this.log.info('Build is pre-existing, skipping upload');
+    } else {
+      this.log.info('Uploading build...');
 
-    await this.uploadToUrl(url, buildPath, metadata);
+      await this.uploadToUrl(url, buildPath, metadata);
 
-    const { application_id } = await this.extractBuildInfo();
+      const { application_id } = await this.extractBuildInfo();
 
-    this.log.info(`Build "${application_id}" processed successfully`);
+      this.log.info(`Build "${application_id}" processed successfully`);
+    }
 
     return build_id;
   }
