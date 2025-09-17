@@ -66,9 +66,7 @@ export class BuildChannel extends BaseChannel {
     const response = await this.requestUploadUrl(metadata, appSlug);
 
     if (response.existing) {
-      this.log.info(
-        `Build "${response.application_id}" processed successfully`,
-      );
+      this.log.info('Build is pre-existing, skipping upload');
     } else {
       this.log.info('Uploading build...');
 
